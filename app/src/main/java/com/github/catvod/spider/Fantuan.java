@@ -26,9 +26,9 @@ import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class Lib extends Spider {
-    private static final String siteUrl = "https://www.libvio.fun";
-    private static final String siteHost = "www.libvio.fun";
+public class Fantuan extends Spider {
+    private static final String siteUrl = "https://www.fantuanhd.com";
+    private static final String siteHost = "www.fantuanhd.com";
 
     /**
      * 播放源配置
@@ -38,21 +38,19 @@ public class Lib extends Spider {
      * 筛选配置
      */
     private JSONObject filterConfig;
-    private Pattern regexCategory = Pattern.compile("/type/(\\d+).html");
-    private Pattern regexVid = Pattern.compile("/detail/(\\d+).html");
-    private Pattern regexPlay = Pattern.compile("/play/(\\d+)-(\\d+)-(\\d+).html");
-    private Pattern regexPage = Pattern.compile("/show/(\\S+).html");
+    private Pattern regexCategory = Pattern.compile("/type/id-(\\w+).html");
+    private Pattern regexVid = Pattern.compile("/detail/id-(\\w+).html");
+    private Pattern regexPlay = Pattern.compile("/play/id-(\\w+)-(\\d+)-(\\d+).html");
+    private Pattern regexPage = Pattern.compile("\\S+/page/(\\d+)\\S+");
 
     protected String ext = null;
 
-   @Override
+    @Override
     public void init(Context context) {
         super.init(context);
         try {
-            String DataExt = OkHttpUtil.string("http://box.qinglin.tk/live/Lib.json", null);
-            JSONObject Config = new JSONObject(DataExt);
-            playerConfig = Config.getJSONObject("player");
-            filterConfig = Config.getJSONObject("filter");
+            playerConfig = new JSONObject("{\"xg_app_player\":{\"show\":\"app全局解析\",\"or\":999,\"ps\":\"1\",\"parse\":\"\"},\"duoduozy\":{\"show\":\"自营极速\",\"or\":999,\"ps\":\"0\",\"parse\":\"\"},\"uploadixigua\":{\"show\":\"自营蓝光\",\"or\":999,\"ps\":\"0\",\"parse\":\"\"},\"gpmp4\":{\"show\":\"自营超清\",\"or\":999,\"ps\":\"0\",\"parse\":\"\"},\"rx\":{\"show\":\"融兴线路\",\"or\":999,\"ps\":\"0\",\"parse\":\"\"},\"xigua\":{\"show\":\"西瓜高清\",\"or\":999,\"ps\":\"0\",\"parse\":\"\"},\"mgtv\":{\"show\":\"芒果高清\",\"or\":999,\"ps\":\"0\",\"parse\":\"\"},\"qq\":{\"show\":\"腾讯高清\",\"or\":999,\"ps\":\"0\",\"parse\":\"\"},\"youku\":{\"show\":\"优酷高清\",\"or\":999,\"ps\":\"0\",\"parse\":\"\"},\"qiyi\":{\"show\":\"奇艺高清\",\"or\":999,\"ps\":\"0\",\"parse\":\"\"},\"pptv\":{\"show\":\"PPTV\",\"or\":999,\"ps\":\"0\",\"parse\":\"\"},\"letv\":{\"show\":\"乐视云\",\"or\":999,\"ps\":\"0\",\"parse\":\"\"},\"sohu\":{\"show\":\"搜狐云\",\"or\":999,\"ps\":\"0\",\"parse\":\"\"},\"bilibili\":{\"show\":\"哔哩云\",\"or\":999,\"ps\":\"0\",\"parse\":\"\"},\"dbm3u8\":{\"show\":\"百度云\",\"des\":\"在线播放\",\"ps\":\"0\",\"parse\":\"\"},\"tkm3u8\":{\"show\":\"天空云\",\"des\":\"天空播放器\",\"ps\":\"0\",\"parse\":\"\"},\"dplayer\":{\"show\":\"DPlayer-H5播放器\",\"des\":\"dplayer.js.org\",\"ps\":\"0\",\"parse\":\"\"},\"videojs\":{\"show\":\"videojs-H5播放器\",\"des\":\"videojs.com\",\"ps\":\"0\",\"parse\":\"\"},\"iva\":{\"show\":\"iva-H5播放器\",\"des\":\"videojj.com\",\"ps\":\"0\",\"parse\":\"\"},\"iframe\":{\"show\":\"iframe外链数据\",\"des\":\"iframe外链数据\",\"ps\":\"0\",\"parse\":\"\"},\"link\":{\"show\":\"外链数据\",\"des\":\"外部网站播放链接\",\"ps\":\"0\",\"parse\":\"\"},\"swf\":{\"show\":\"Flash文件\",\"des\":\"swf\",\"ps\":\"0\",\"parse\":\"\"},\"flv\":{\"show\":\"Flv文件\",\"des\":\"flv\",\"ps\":\"0\",\"parse\":\"\"},\"bdxm3u8\":{\"show\":\"北斗云\",\"des\":\"在线播放\",\"ps\":\"0\",\"parse\":\"\"},\"lym3u8\":{\"show\":\"老鸭资源\",\"des\":\"在线播放\",\"ps\":\"0\",\"parse\":\"\"},\"aliplayer\":{\"show\":\"阿里云播放器\",\"or\":999,\"ps\":\"0\",\"parse\":\"\"},\"hnm3u8\":{\"show\":\"红牛云\",\"or\":999,\"ps\":\"0\",\"parse\":\"\"},\"kbm3u8\":{\"show\":\"快播云\",\"or\":999,\"ps\":\"0\",\"parse\":\"\"},\"wjm3u8\":{\"show\":\"无尽备用\",\"or\":999,\"ps\":\"0\",\"parse\":\"\"}}");
+            filterConfig = new JSONObject("{\"20\":[{\"key\":\"class\",\"name\":\"类型\",\"value\":[{\"n\":\"全部\",\"v\":\"\"},{\"n\":\"喜剧\",\"v\":\"喜剧\"},{\"n\":\"爱情\",\"v\":\"爱情\"},{\"n\":\"恐怖\",\"v\":\"恐怖\"},{\"n\":\"动作\",\"v\":\"动作\"},{\"n\":\"科幻\",\"v\":\"科幻\"},{\"n\":\"剧情\",\"v\":\"剧情\"},{\"n\":\"战争\",\"v\":\"战争\"},{\"n\":\"犯罪\",\"v\":\"犯罪\"},{\"n\":\"灾难\",\"v\":\"灾难\"},{\"n\":\"奇幻\",\"v\":\"奇幻\"},{\"n\":\"悬疑\",\"v\":\"悬疑\"},{\"n\":\"惊悚\",\"v\":\"惊悚\"},{\"n\":\"冒险\",\"v\":\"冒险\"}]},{\"key\":\"area\",\"name\":\"地区\",\"value\":[{\"n\":\"全部\",\"v\":\"\"},{\"n\":\"大陆\",\"v\":\"大陆\"},{\"n\":\"香港\",\"v\":\"香港\"},{\"n\":\"台湾\",\"v\":\"台湾\"},{\"n\":\"美国\",\"v\":\"美国\"},{\"n\":\"法国\",\"v\":\"法国\"},{\"n\":\"英国\",\"v\":\"英国\"},{\"n\":\"日本\",\"v\":\"日本\"},{\"n\":\"韩国\",\"v\":\"韩国\"},{\"n\":\"德国\",\"v\":\"德国\"},{\"n\":\"泰国\",\"v\":\"泰国\"},{\"n\":\"印度\",\"v\":\"印度\"},{\"n\":\"其他\",\"v\":\"其他\"}]},{\"key\":\"lang\",\"name\":\"语言\",\"value\":[{\"n\":\"全部\",\"v\":\"\"},{\"n\":\"普通话\",\"v\":\"普通话\"},{\"n\":\"韩语\",\"v\":\"韩语\"},{\"n\":\"日语\",\"v\":\"日语\"},{\"n\":\"英语\",\"v\":\"英语\"},{\"n\":\"粤语\",\"v\":\"粤语\"},{\"n\":\"闽南语\",\"v\":\"闽南语\"},{\"n\":\"法语\",\"v\":\"法语\"},{\"n\":\"俄语\",\"v\":\"俄语\"},{\"n\":\"意大利语\",\"v\":\"意大利语\"},{\"n\":\"德语\",\"v\":\"德语\"},{\"n\":\"其它\",\"v\":\"其它\"}]},{\"key\":\"year\",\"name\":\"年份\",\"value\":[{\"n\":\"全部\",\"v\":\"\"},{\"n\":\"2022\",\"v\":\"2022\"},{\"n\":\"2021\",\"v\":\"2021\"},{\"n\":\"2020\",\"v\":\"2020\"},{\"n\":\"2019\",\"v\":\"2019\"},{\"n\":\"2018\",\"v\":\"2018\"},{\"n\":\"2017\",\"v\":\"2017\"},{\"n\":\"2016\",\"v\":\"2016\"},{\"n\":\"2008\",\"v\":\"2008\"},{\"n\":\"2000\",\"v\":\"2000\"},{\"n\":\"1997\",\"v\":\"1997\"},{\"n\":\"1980\",\"v\":\"1980\"}]},{\"key\":\"by\",\"name\":\"排序\",\"value\":[{\"n\":\"全部\",\"v\":\"\"},{\"n\":\"时间\",\"v\":\"time\"},{\"n\":\"人气\",\"v\":\"hits\"},{\"n\":\"评分\",\"v\":\"score\"}]}],\"21\":[{\"key\":\"class\",\"name\":\"类型\",\"value\":[{\"n\":\"全部\",\"v\":\"\"},{\"n\":\"古装\",\"v\":\"古装\"},{\"n\":\"战争\",\"v\":\"战争\"},{\"n\":\"偶像\",\"v\":\"偶像\"},{\"n\":\"犯罪\",\"v\":\"犯罪\"},{\"n\":\"奇幻\",\"v\":\"奇幻\"},{\"n\":\"剧情\",\"v\":\"剧情\"},{\"n\":\"历史\",\"v\":\"历史\"},{\"n\":\"网剧\",\"v\":\"网剧\"}]},{\"key\":\"area\",\"name\":\"地区\",\"value\":[{\"n\":\"全部\",\"v\":\"\"},{\"n\":\"大陆\",\"v\":\"大陆\"},{\"n\":\"香港\",\"v\":\"香港\"},{\"n\":\"台湾\",\"v\":\"台湾\"},{\"n\":\"美国\",\"v\":\"美国\"},{\"n\":\"法国\",\"v\":\"法国\"},{\"n\":\"英国\",\"v\":\"英国\"},{\"n\":\"日本\",\"v\":\"日本\"},{\"n\":\"韩国\",\"v\":\"韩国\"},{\"n\":\"德国\",\"v\":\"德国\"},{\"n\":\"泰国\",\"v\":\"泰国\"},{\"n\":\"印度\",\"v\":\"印度\"},{\"n\":\"其他\",\"v\":\"其他\"}]},{\"key\":\"lang\",\"name\":\"语言\",\"value\":[{\"n\":\"全部\",\"v\":\"\"},{\"n\":\"普通话\",\"v\":\"普通话\"},{\"n\":\"韩语\",\"v\":\"韩语\"},{\"n\":\"日语\",\"v\":\"日语\"},{\"n\":\"英语\",\"v\":\"英语\"},{\"n\":\"粤语\",\"v\":\"粤语\"},{\"n\":\"闽南语\",\"v\":\"闽南语\"},{\"n\":\"法语\",\"v\":\"法语\"},{\"n\":\"俄语\",\"v\":\"俄语\"},{\"n\":\"意大利语\",\"v\":\"意大利语\"},{\"n\":\"德语\",\"v\":\"德语\"},{\"n\":\"其它\",\"v\":\"其它\"}]},{\"key\":\"year\",\"name\":\"年份\",\"value\":[{\"n\":\"全部\",\"v\":\"\"},{\"n\":\"2022\",\"v\":\"2022\"},{\"n\":\"2021\",\"v\":\"2021\"},{\"n\":\"2020\",\"v\":\"2020\"},{\"n\":\"2019\",\"v\":\"2019\"},{\"n\":\"2018\",\"v\":\"2018\"},{\"n\":\"2017\",\"v\":\"2017\"},{\"n\":\"2016\",\"v\":\"2016\"},{\"n\":\"2008\",\"v\":\"2008\"},{\"n\":\"2000\",\"v\":\"2000\"},{\"n\":\"1997\",\"v\":\"1997\"},{\"n\":\"1980\",\"v\":\"1980\"}]},{\"key\":\"by\",\"name\":\"排序\",\"value\":[{\"n\":\"全部\",\"v\":\"\"},{\"n\":\"时间\",\"v\":\"time\"},{\"n\":\"人气\",\"v\":\"hits\"},{\"n\":\"评分\",\"v\":\"score\"}]}],\"22\":[{\"key\":\"class\",\"name\":\"类型\",\"value\":[{\"n\":\"全部\",\"v\":\"\"},{\"n\":\"相声\",\"v\":\"相声\"},{\"n\":\"真人秀\",\"v\":\"真人秀\"},{\"n\":\"脱口秀\",\"v\":\"脱口秀\"},{\"n\":\"选秀\",\"v\":\"选秀\"},{\"n\":\"情感\",\"v\":\"情感\"},{\"n\":\"访谈\",\"v\":\"访谈\"},{\"n\":\"音乐\",\"v\":\"音乐\"},{\"n\":\"纪实\",\"v\":\"纪实\"},{\"n\":\"舞蹈\",\"v\":\"舞蹈\"}]},{\"key\":\"area\",\"name\":\"地区\",\"value\":[{\"n\":\"全部\",\"v\":\"\"},{\"n\":\"大陆\",\"v\":\"大陆\"},{\"n\":\"香港\",\"v\":\"香港\"},{\"n\":\"台湾\",\"v\":\"台湾\"},{\"n\":\"欧美\",\"v\":\"欧美\"},{\"n\":\"日本\",\"v\":\"日本\"},{\"n\":\"韩国\",\"v\":\"韩国\"}]},{\"key\":\"year\",\"name\":\"年份\",\"value\":[{\"n\":\"全部\",\"v\":\"\"},{\"n\":\"2022\",\"v\":\"2022\"},{\"n\":\"2021\",\"v\":\"2021\"},{\"n\":\"2020\",\"v\":\"2020\"},{\"n\":\"2019\",\"v\":\"2019\"},{\"n\":\"2018\",\"v\":\"2018\"},{\"n\":\"2017\",\"v\":\"2017\"},{\"n\":\"2016\",\"v\":\"2016\"},{\"n\":\"2008\",\"v\":\"2008\"},{\"n\":\"2000\",\"v\":\"2000\"},{\"n\":\"1997\",\"v\":\"1997\"},{\"n\":\"1980\",\"v\":\"1980\"}]},{\"key\":\"by\",\"name\":\"排序\",\"value\":[{\"n\":\"全部\",\"v\":\"\"},{\"n\":\"时间\",\"v\":\"time\"},{\"n\":\"人气\",\"v\":\"hits\"},{\"n\":\"评分\",\"v\":\"score\"}]}],\"23\":[{\"key\":\"class\",\"name\":\"类型\",\"value\":[{\"n\":\"全部\",\"v\":\"\"},{\"n\":\"科幻\",\"v\":\"科幻\"},{\"n\":\"热血\",\"v\":\"热血\"},{\"n\":\"推理\",\"v\":\"推理\"},{\"n\":\"搞笑\",\"v\":\"搞笑\"},{\"n\":\"冒险\",\"v\":\"冒险\"},{\"n\":\"萝莉\",\"v\":\"萝莉\"},{\"n\":\"校园\",\"v\":\"校园\"},{\"n\":\"动作\",\"v\":\"动作\"},{\"n\":\"机战\",\"v\":\"机战\"},{\"n\":\"运动\",\"v\":\"运动\"},{\"n\":\"战争\",\"v\":\"战争\"},{\"n\":\"少年\",\"v\":\"少年\"},{\"n\":\"少女\",\"v\":\"少女\"}]},{\"key\":\"area\",\"name\":\"地区\",\"value\":[{\"n\":\"全部\",\"v\":\"\"},{\"n\":\"大陆\",\"v\":\"大陆\"},{\"n\":\"香港\",\"v\":\"香港\"},{\"n\":\"台湾\",\"v\":\"台湾\"},{\"n\":\"美国\",\"v\":\"美国\"},{\"n\":\"日本\",\"v\":\"日本\"}]},{\"key\":\"lang\",\"name\":\"语言\",\"value\":[{\"n\":\"全部\",\"v\":\"\"},{\"n\":\"普通话\",\"v\":\"普通话\"},{\"n\":\"韩语\",\"v\":\"韩语\"},{\"n\":\"日语\",\"v\":\"日语\"},{\"n\":\"英语\",\"v\":\"英语\"},{\"n\":\"粤语\",\"v\":\"粤语\"},{\"n\":\"闽南语\",\"v\":\"闽南语\"},{\"n\":\"法语\",\"v\":\"法语\"},{\"n\":\"俄语\",\"v\":\"俄语\"},{\"n\":\"意大利语\",\"v\":\"意大利语\"},{\"n\":\"德语\",\"v\":\"德语\"},{\"n\":\"其它\",\"v\":\"其它\"}]},{\"key\":\"year\",\"name\":\"年份\",\"value\":[{\"n\":\"全部\",\"v\":\"\"},{\"n\":\"2022\",\"v\":\"2022\"},{\"n\":\"2021\",\"v\":\"2021\"},{\"n\":\"2020\",\"v\":\"2020\"},{\"n\":\"2019\",\"v\":\"2019\"},{\"n\":\"2018\",\"v\":\"2018\"},{\"n\":\"2017\",\"v\":\"2017\"},{\"n\":\"2016\",\"v\":\"2016\"},{\"n\":\"2008\",\"v\":\"2008\"},{\"n\":\"2000\",\"v\":\"2000\"},{\"n\":\"1997\",\"v\":\"1997\"},{\"n\":\"1980\",\"v\":\"1980\"}]},{\"key\":\"by\",\"name\":\"排序\",\"value\":[{\"n\":\"全部\",\"v\":\"\"},{\"n\":\"时间\",\"v\":\"time\"},{\"n\":\"人气\",\"v\":\"hits\"},{\"n\":\"评分\",\"v\":\"score\"}]}],\"24\":[{\"key\":\"class\",\"name\":\"类型\",\"value\":[{\"n\":\"全部\",\"v\":\"\"},{\"n\":\"历史\",\"v\":\"历史\"},{\"n\":\"传记\",\"v\":\"传记\"},{\"n\":\"生活\",\"v\":\"生活\"},{\"n\":\"人文\",\"v\":\"人文\"},{\"n\":\"地理\",\"v\":\"地理\"},{\"n\":\"舞台\",\"v\":\"舞台\"},{\"n\":\"时事\",\"v\":\"时事\"},{\"n\":\"宣传\",\"v\":\"宣传\"}]},{\"key\":\"area\",\"name\":\"地区\",\"value\":[{\"n\":\"全部\",\"v\":\"\"},{\"n\":\"大陆\",\"v\":\"大陆\"},{\"n\":\"香港\",\"v\":\"香港\"},{\"n\":\"台湾\",\"v\":\"台湾\"},{\"n\":\"美国\",\"v\":\"美国\"},{\"n\":\"日本\",\"v\":\"日本\"},{\"n\":\"泰国\",\"v\":\"泰国\"},{\"n\":\"英国\",\"v\":\"英国\"},{\"n\":\"新加坡\",\"v\":\"新加坡\"},{\"n\":\"其他\",\"v\":\"其他\"}]},{\"key\":\"year\",\"name\":\"年份\",\"value\":[{\"n\":\"全部\",\"v\":\"\"},{\"n\":\"2022\",\"v\":\"2022\"},{\"n\":\"2021\",\"v\":\"2021\"},{\"n\":\"2020\",\"v\":\"2020\"},{\"n\":\"2019\",\"v\":\"2019\"},{\"n\":\"2018\",\"v\":\"2018\"},{\"n\":\"2017\",\"v\":\"2017\"},{\"n\":\"2016\",\"v\":\"2016\"},{\"n\":\"2008\",\"v\":\"2008\"},{\"n\":\"2000\",\"v\":\"2000\"},{\"n\":\"1997\",\"v\":\"1997\"},{\"n\":\"1980\",\"v\":\"1980\"}]}]}");
         } catch (JSONException e) {
             SpiderDebug.log(e);
         }
@@ -89,20 +87,21 @@ public class Lib extends Spider {
      * @param filter 是否开启筛选 关联的是 软件设置中 首页数据源里的筛选开关
      * @return
      */
-    @Override
+     @Override
     public String homeContent(boolean filter) {
         try {
             Document doc = Jsoup.parse(OkHttpUtil.string(siteUrl, getHeaders(siteUrl)));
             // 分类节点
-            Elements elements = doc.select("ul.stui-header__menu li a");
+            Elements elements = doc.select("ul.stui-header__menu > li a");
             JSONArray classes = new JSONArray();
             for (Element ele : elements) {
                 String name = ele.text();
                 boolean show = name.equals("电影") ||
-                        name.equals("剧集") ||
+                        name.equals("电视剧") ||
+                        name.equals("综艺") ||
                         name.equals("动漫") ||
-                        name.equals("日韩剧") ||
-                        name.equals("欧美剧");
+                        name.equals("动画片") ||
+                        name.equals("纪录片");
                 if (show) {
                     Matcher mather = regexCategory.matcher(ele.attr("href"));
                     if (!mather.find())
@@ -122,17 +121,16 @@ public class Lib extends Spider {
             result.put("class", classes);
             try {
                 // 取首页推荐视频列表
-                Element homeList = doc.select("ul.stui-vodlist").get(0);
-                Elements list = homeList.select("div.stui-vodlist__box");
+                Elements list = doc.select("ul.stui-vodlist:nth-child(3) li div.stui-vodlist__box");
                 JSONArray videos = new JSONArray();
                 for (int i = 0; i < list.size(); i++) {
-                    Element vod = list.get(i);
-                    String title = vod.select("a").attr("title");
-                    String cover = vod.select("a").attr("data-original");
-                    String remark = vod.select("a .pic-text").text();
-                    Matcher matcher = regexVid.matcher(vod.select("a").attr("href"));
+                    Element vod = list.get(i);        
+                       Matcher matcher = regexVid.matcher(vod.selectFirst("div.stui-vodlist__detail h4 a").attr("href"));
                     if (!matcher.find())
                         continue;
+                    String title = vod.selectFirst(".stui-vodlist__thumb").attr("title");
+                    String cover = vod.selectFirst(".stui-vodlist__thumb").attr("data-original");
+                    String remark = vod.selectFirst("span.pic-text").text();
                     String id = matcher.group(1);
                     JSONObject v = new JSONObject();
                     v.put("vod_id", id);
@@ -164,24 +162,28 @@ public class Lib extends Spider {
     @Override
     public String categoryContent(String tid, String pg, boolean filter, HashMap<String, String> extend) {
         try {
-            String[] urlParams = new String[]{"", "", "", "", "", "", "", "", "", "", "", ""};
-            urlParams[0] = tid;
-            urlParams[8] = pg;
+            String url = siteUrl + "/show/id-";
+            if (extend != null && extend.size() > 0 && extend.containsKey("tid") && extend.get("tid").length() > 0) {
+                url += extend.get("tid");
+            } else {
+                url += tid;
+            }
             if (extend != null && extend.size() > 0) {
                 for (Iterator<String> it = extend.keySet().iterator(); it.hasNext(); ) {
                     String key = it.next();
                     String value = extend.get(key);
-                    urlParams[Integer.parseInt(key)] = URLEncoder.encode(value);
+                    if (value.length() > 0) {
+                        url += "/" + key + "/" + URLEncoder.encode(value);
+                    }
                 }
             }
+            url += "/page/" + pg + ".html";
             // 获取分类数据的url
-            String url = siteUrl + "/show/" + TextUtils.join("-", urlParams) + ".html";
             String html = OkHttpUtil.string(url, getHeaders(url));
             Document doc = Jsoup.parse(html);
             JSONObject result = new JSONObject();
             int pageCount = 0;
             int page = -1;
-
             // 取页码相关信息
             Elements pageInfo = doc.select("ul.stui-page__item li");
             if (pageInfo.size() == 0) {
@@ -197,8 +199,7 @@ public class Lib extends Spider {
                     if (page == -1 && li.hasClass("active")) {
                         Matcher matcher = regexPage.matcher(a.attr("href"));
                         if (matcher.find()) {
-                            //System.out.println("哈哈"+matcher.group(1));
-                            page = Integer.parseInt(matcher.group(1).split("-")[8]);
+                            page = Integer.parseInt(matcher.group(1));
                         } else {
                             page = 0;
                         }
@@ -206,8 +207,7 @@ public class Lib extends Spider {
                     if (name.equals("尾页")) {
                         Matcher matcher = regexPage.matcher(a.attr("href"));
                         if (matcher.find()) {
-                            //System.out.println("尾页" + matcher.group(1));
-                            pageCount = Integer.parseInt(matcher.group(1).split("-")[8]);
+                            pageCount = Integer.parseInt(matcher.group(1));
                         } else {
                             pageCount = 0;
                         }
@@ -217,15 +217,14 @@ public class Lib extends Spider {
             }
 
             JSONArray videos = new JSONArray();
-            if (!html.contains("没有找到您想要的结果哦")) {
-                // 取当前分类页的视频列表
-                Elements list = doc.select("div.stui-vodlist__box");
+            if (!html.contains("没有找到您想要的结果哦")) {         // 取当前分类页的视频列表
+                Elements list = doc.select("ul.stui-vodlist li div.stui-vodlist__box");
                 for (int i = 0; i < list.size(); i++) {
                     Element vod = list.get(i);
-                    String title = vod.select("a").attr("title");
-                    String cover = vod.select("a").attr("data-original");
-                    String remark = vod.select("a .pic-text").text();
-                    Matcher matcher = regexVid.matcher(vod.select("a").attr("href"));
+                    String title = vod.selectFirst(".stui-vodlist__thumb").attr("title");
+                    String cover = vod.selectFirst(".stui-vodlist__thumb").attr("data-original");
+                    String remark = vod.selectFirst("span.pic-text").text();
+                    Matcher matcher = regexVid.matcher(vod.selectFirst("div.stui-vodlist__detail h4 a").attr("href"));
                     if (!matcher.find())
                         continue;
                     String id = matcher.group(1);
@@ -239,8 +238,8 @@ public class Lib extends Spider {
             }
             result.put("page", page);
             result.put("pagecount", pageCount);
-            result.put("limit", 48);
-            result.put("total", pageCount <= 1 ? videos.length() : pageCount * 48);
+            result.put("limit", 30);
+            result.put("total", pageCount <= 1 ? videos.length() : pageCount * 30);
 
             result.put("list", videos);
             return result.toString();
@@ -250,7 +249,7 @@ public class Lib extends Spider {
         return "";
     }
     
-    private static String doReplaceRegex(Pattern pattern, String content) {
+    private static String Regex(Pattern pattern, String content) {
         if (pattern == null) {
             return content;
         }
@@ -275,30 +274,22 @@ public class Lib extends Spider {
     public String detailContent(List<String> ids) {
         try {
             // 视频详情url
-            String url = siteUrl + "/detail/" + ids.get(0) + ".html";
+            String url = siteUrl + "/detail/id-" + ids.get(0) + ".html";
             Document doc = Jsoup.parse(OkHttpUtil.string(url, getHeaders(url)));
             JSONObject result = new JSONObject();
             JSONObject vodList = new JSONObject();
 
-            // 取基本数据
-            String cover = doc.select("div.stui-content__thumb a img").attr("data-original");
-            String title = doc.select("div.stui-content__detail h1").text();
+            // 取基本数据            
+            String cover = doc.selectFirst("a.pic img").attr("data-original");
+            String title = doc.selectFirst("a.pic").attr("title");
             String category = "", area = "", year = "", remark = "", director = "", actor = "", desc = "";
             Elements data = doc.select("p.data");
-            Pattern cate = Pattern.compile("类型：(\\S+)");
-            category = doReplaceRegex(cate, data.get(0).text());
-            Pattern areas = Pattern.compile("地区：(\\S+)");
-            area = doReplaceRegex(areas, data.get(0).text());
-            Pattern years = Pattern.compile("年份：(\\S+)");
-            year = doReplaceRegex(years, data.get(0).text());
-            Pattern rms = Pattern.compile("更新：(\\S+)");
-            remark = doReplaceRegex(rms, data.get(3).text());
-            Pattern acs = Pattern.compile("主演：(\\S+)");
-            actor = doReplaceRegex(acs, data.get(1).text());
-            Pattern dis = Pattern.compile("导演：(\\S+)");
-            director = doReplaceRegex(dis, data.get(1).text());
-
             desc = doc.selectFirst("span.detail-content").text().trim();
+            category = Regex(Pattern.compile("类型：(\\S+)"), data.get(0).text());
+            area = Regex(Pattern.compile("地区：(\\S+)"), data.get(0).text());
+            year = Regex(Pattern.compile("年份：(\\S+)"), data.get(0).text());
+            actor = Regex(Pattern.compile("主演：(\\S+)"), data.get(1).text());
+            director = Regex(Pattern.compile("导演：(\\S+)"), data.get(1).text());
 
             vodList.put("vod_id", ids.get(0));
             vodList.put("vod_name", title);
@@ -328,19 +319,18 @@ public class Lib extends Spider {
                     return 1;
                 }
             });
-
             // 取播放列表数据
-            Elements sources = doc.select("div.stui-vodlist__head h3");
-            Elements sourceList = doc.select("ul.stui-content__playlist");
-
+            Elements sources = doc.select("div.stui-pannel__bd div.stui-vodlist__head h3");
+            Elements sourcelist = doc.select("ul.stui-content__playlist");
             for (int i = 0; i < sources.size(); i++) {
                 Element source = sources.get(i);
                 String sourceName = source.text();
+//                String tabHref = source.attr("href");
                 boolean found = false;
                 for (Iterator<String> it = playerConfig.keys(); it.hasNext(); ) {
                     String flag = it.next();
-                    if (playerConfig.getJSONObject(flag).getString("sh").equals(sourceName)) {
-                        sourceName = flag;
+                    if (playerConfig.getJSONObject(flag).getString("show").equals(sourceName)) {
+                        sourceName = playerConfig.getJSONObject(flag).getString("show");
                         found = true;
                         break;
                     }
@@ -348,7 +338,7 @@ public class Lib extends Spider {
                 if (!found)
                     continue;
                 String playList = "";
-                Elements playListA = sourceList.get(i).select("li a");
+                Elements playListA = sourcelist.get(i).select("ul.stui-content__playlist > li > a");
                 List<String> vodItems = new ArrayList<>();
 
                 for (int j = 0; j < playListA.size(); j++) {
@@ -398,14 +388,14 @@ public class Lib extends Spider {
         try {
             //定义播放用的headers
             JSONObject headers = new JSONObject();
-            headers.put("origin", " https://www.libvio.fun");
+            headers.put("origin", " https://www.fantuanhd.com");
             headers.put("User-Agent", " Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36");
             headers.put("Accept", " */*");
             headers.put("Accept-Language", " zh-CN,zh;q=0.9,en-US;q=0.3,en;q=0.7");
             headers.put("Accept-Encoding", " gzip, deflate");
-            headers.put("referer", " https://www.libvio.fun");
+            headers.put("referer", " https://www.fantuanhd.com");
             // 播放页 url
-            String url = siteUrl + "/play/" + id + ".html";
+            String url = siteUrl + "/play/id-" + id + ".html";
             Document doc = Jsoup.parse(OkHttpUtil.string(url, getHeaders(url)));
 
             Elements allScript = doc.select("script");
