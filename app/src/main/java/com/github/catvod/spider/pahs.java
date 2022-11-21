@@ -346,8 +346,7 @@ public class pahs extends Spider {
      * @param vipFlags 所有可能需要vip解析的源
      * @return
      */
-     
-    private final Pattern var confi = Pattern.compile("var config = ([\\s\\S]*?)player"");
+    
     private final Pattern urlt = Pattern.compile("\"url\": *\"([^\"]*)\",");
     private final Pattern token = Pattern.compile("\"token\": *\"([^\"]*)\"");
     private final Pattern vkey = Pattern.compile("\"vkey\": *\"([^\"]*)\",");
