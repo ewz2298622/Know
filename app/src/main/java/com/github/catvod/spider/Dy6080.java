@@ -106,7 +106,7 @@ public class Dy6080 extends Spider {
                 }
                 Document doc = Jsoup.parse(OkHttpUtil.string(url, getHeaders(url))); */
                 // 分类节点
-                Elements elements = doc.select("ul.nav-menu-items > li > a");
+                Elements elements = doc.select("ul.drop-content-items > li > a");
             JSONArray classes = new JSONArray();
             for (Element ele : elements) {
                 //分类名
@@ -229,13 +229,17 @@ public class Dy6080 extends Spider {
             JSONArray videos = new JSONArray();
             if (!html.contains("没有找到您想要的结果哦")) {
                 // 取当前分类页的视频列表
-                Elements list = doc.select("div.module-main div.module-items a");
+                Elements list = doc.select("div.module-items>div");
                 for (int i = 0; i < list.size(); i++) {
                     Element vod = list.get(i);
-                    String title = vod.attr("title");
-                    String cover = FixUrl(pic, vod.select("div.module-item-pic img").attr("data-original"));
-                    String remark = vod.select("div.module-item-note").text();
-                    Matcher matcher = regexVid.matcher(vod.attr("href"));
+                    String title = vod.selectFirst("div.module-item-cover > div.module-item-pic > a").attr("title");
+                    String cover = vod.selectFirst("div.module-item-cover > div.module-item-pic > img").attr("data-src");
+                    String remark = "";
+                    Element remarkElement = vod.selectFirst("div.module-item-text");
+                    if (remarkElement != null) {
+                        remark = remarkElement.text();
+                    }
+                    Matcher matcher = regexVid.matcher(vod.selectFirst("div.module-item-cover > div.module-item-pic > a").attr("href"));
                     if (!matcher.find())
                         continue;
                     String id = matcher.group(1);
@@ -274,41 +278,11 @@ public class Dy6080 extends Spider {
             Document doc = Jsoup.parse(OkHttpUtil.string(url, getHeaders(url)));
             JSONObject result = new JSONObject();
             JSONObject vodList = new JSONObject();
-
-            String cover = FixUrl(pic, doc.selectFirst("div.module-item-pic img").attr("data-src"));
-            String title = doc.selectFirst("div.video-info-header h1").text();
-
-            String category = "", area = "", year = "", director = "", actor = "", remark = "", desc = "";
-
-            category = doc.select("div.module-info-tag-link").get(2).text();
-            year = doc.select("div.module-info-tag-link a").get(0).text();
-            area = doc.select("div.module-info-tag-link a").get(1).text();
-            desc = doc.select("div.module-info-introduction-content p").text();
-
-            Elements span_text_muted = doc.select("div.module-info-item span");
-            for (int i = 0; i < span_text_muted.size() - 2; i++) {
-                Element Spantext = span_text_muted.get(i);
-                String info = Spantext.text();
-                if (info.contains("更新：")) {
-                    try {
-                        remark = Spantext.parent().select("div").text();
-                    } catch (Exception e) {
-                        remark = "";
-                    }
-                } else if (info.contains("导演：")) {
-                    try {
-                        director = Spantext.parent().select("div a").text();
-                    } catch (Exception e) {
-                        director = "";
-                    }
-                } else if (info.contains("主演：")) {
-                    try {
-                        actor = Spantext.parent().select("div a").text();
-                    } catch (Exception e) {
-                        actor = "";
-                    }
-                }
-            }
+            // 取基本数据
+            String cover = doc.selectFirst("div.module-item-pic > img").attr("data-src");
+            String title = doc.selectFirst("div.video-info-header > h1.page-title").text();
+            String desc = doc.select("div.video-info-content").text();
+            String category = "", area = "", year = "", remark = "", director = "", actor = "";
 
             vodList.put("vod_id", ids.get(0));
             vodList.put("vod_name", title);
@@ -320,7 +294,6 @@ public class Dy6080 extends Spider {
             vodList.put("vod_actor", actor);
             vodList.put("vod_director", director);
             vodList.put("vod_content", desc);
-
             Map<String, String> vod_play = new TreeMap<>(new Comparator<String>() {
                 @Override
                 public int compare(String o1, String o2) {
@@ -338,7 +311,6 @@ public class Dy6080 extends Spider {
                     return 1;
                 }
             });
-
             // 取播放列表数据
             Elements sources = doc.select("div.module-tab-content div span");
             Elements sourceList = doc.select("div.module-player-list");
