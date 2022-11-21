@@ -47,7 +47,7 @@ public class pahs extends Spider {
     private Pattern regexCategory = Pattern.compile("/vodtype/(\\d+).html");
     private Pattern regexVid = Pattern.compile("/v/(\\d+).html");
     private Pattern regexPlay = Pattern.compile("/ph/(\\S+).html");
-    private Pattern regexPage = Pattern.compile("/vodshow/(\\S+).html");
+    private Pattern regexPage = Pattern.compile("\\S+/page/(\\d+)\\S+");
 
     @Override
     public void init(Context context) {
@@ -275,7 +275,7 @@ public class pahs extends Spider {
 
             String title = doc.selectFirst("div.module-info-heading > h1").text();
 
-            String desc = doc.selectFirst("div.module-blocklist > span").text();
+            String desc = doc.selectFirst("div.module-info-introduction-content p").text();
             System.out.println("co" + desc);
             vodList.put("vod_id", ids.get(0));
             vodList.put("vod_name", title);
@@ -346,7 +346,8 @@ public class pahs extends Spider {
      * @param vipFlags 所有可能需要vip解析的源
      * @return
      */
-
+     
+    private final Pattern urlt = Pattern.compile("var config = ([\\s\\S]*?)player"");
     private final Pattern urlt = Pattern.compile("\"url\": *\"([^\"]*)\",");
     private final Pattern token = Pattern.compile("\"token\": *\"([^\"]*)\"");
     private final Pattern vkey = Pattern.compile("\"vkey\": *\"([^\"]*)\",");
@@ -355,12 +356,12 @@ public class pahs extends Spider {
     public String playerContent(String flag, String id, List<String> vipFlags) {
         try {
             JSONObject headers = new JSONObject();
-            headers.put("Referer", " https://www.smdyy.cc/");
+            headers.put("Referer", " http://www.panghuys.com/");
             headers.put("User-Agent", " Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.198 Safari/537.36");
             headers.put("Accept", " text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9");
             headers.put("Accept-Language", " zh-CN,zh;q=0.9,en-GB;q=0.8,en-US;q=0.7,en;q=0.6");
             headers.put("Accept-Encoding", " gzip, deflate");
-            String url = siteUrl + "/play/" + id + ".html";
+            String url = siteUrl + "/ph/" + id + ".html";
             Elements allScript = Jsoup.parse(OkHttpUtil.string(url, getHeaders(url))).select("script");
             JSONObject result = new JSONObject();
             for (int i = 0; i < allScript.size(); i++) {
@@ -394,8 +395,8 @@ public class pahs extends Spider {
                             hashMap.put("token", token);
                             hashMap.put("url", urlt);
                             hashMap.put("vkey", vkey);
-                            hashMap.put("sign", "smdyycc");
-                            OkHttpUtil.post(OkHttpUtil.defaultClient(), "https://player.6080kan.cc/player/xinapi.php", hashMap, new OKCallBack.OKCallBackString() {
+                            hashMap.put("sign", "video_sign");
+                            OkHttpUtil.post(OkHttpUtil.defaultClient(), "http://iwebs.ml/api_config.php", hashMap, new OKCallBack.OKCallBackString() {
                                 @Override
                                 protected void onFailure(Call call, Exception exc) {
                                 }
