@@ -66,12 +66,7 @@ public class pahs extends Spider {
         headers.put("Referer", siteUrl);
         return headers;
     }
-    protected static HashMap<String, String> postHeaders() {
-        HashMap<String, String> hashMap = new HashMap<>();
-        hashMap.put("User-Agent", " Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36");
-        hashMap.put("Origin", " siteUrl");
-        return hashMap;
-    }
+
     /**
      * 爬虫headers
      *
