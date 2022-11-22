@@ -188,7 +188,6 @@ public class Acg extends Spider {
 
             // 取页码相关信息
             Elements pageInfo = doc.select("div[id=page]");
-            System.out.println("pg++" + pageInfo);
             if (pageInfo.size() == 0) {
                 page = Integer.parseInt(pg);
                 pageCount = page;
