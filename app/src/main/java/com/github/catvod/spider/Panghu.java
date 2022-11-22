@@ -211,13 +211,16 @@ public class Panghu extends Spider {
             JSONArray videos = new JSONArray();
             if (!html.contains("没有找到您想要的结果哦")) {
                 // 取当前分类页的视频列表
-                Elements list = doc.select("div.module-items.module-poster-items-base a ");
+                Elements list = doc.select("div[class='module-items module-poster-items-base'] >a");
                 for (int i = 0; i < list.size(); i++) {
                     Element vod = list.get(i);
-                    String title = vod.select("a").attr("title");
-                    String cover = vod.select("img.lazy.lazyload").attr("data-original");
-                    String remark = vod.select("div.module-item-note").text();
-                    Matcher matcher = regexVid.matcher(vod.select("a").attr("href"));
+                    String title = vod.selectFirst(".module-poster-item").attr("title");
+                    String cover = vod.selectFirst("div.module-item-cover div.module-item-pic img").attr("data-original");
+                    if (!TextUtils.isEmpty(cover) && !cover.startsWith("http")) {
+                        cover = siteUrl + cover;
+                    }
+                    String remark = vod.selectFirst("div.module-item-cover div.module-item-note").text();
+                    Matcher matcher = regexVid.matcher(vod.selectFirst(".module-poster-item").attr("href"));
                     if (!matcher.find())
                         continue;
                     String id = matcher.group(1);
