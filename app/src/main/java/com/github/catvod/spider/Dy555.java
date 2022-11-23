@@ -50,14 +50,14 @@ import okhttp3.Response;
 
 public class Dy555 extends Spider {
 
-    private static final String siteUrl = "http://www.panghuys.com";
+    private static final String siteUrl = "https://www.555dianying.cc";
 
     protected JSONObject playerConfig;
     protected JSONObject filterConfig;
 
     protected Pattern regexCategory = Pattern.compile("/vodtype/(\\d+).html");
     protected Pattern regexVoddetail = Pattern.compile("/v/(\\d+).html");
-    protected Pattern regexPlay = Pattern.compile("/ph/(\\d+)-(\\d+)-(\\d+).html");
+    protected Pattern regexPlay = Pattern.compile("/vodplay/(\\S+).html");
     protected Pattern regexPage = Pattern.compile("\\d+/(\\d+)");
 
 
