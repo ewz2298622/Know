@@ -163,7 +163,7 @@ public class Panghu extends Spider {
      * @param filter 同homeContent方法中的filter
      * @param extend 筛选参数{k:v, k1:v1}
      * @return
-     */
+     **/
     @Override
     public String categoryContent(String tid, String pg, boolean filter, HashMap<String, String> extend) {
         try {
@@ -184,7 +184,6 @@ public class Panghu extends Spider {
             }
             url += "/page/" + pg + ".html";
             // 获取分类数据的url
-            //String url = siteUrl + "/show/" + tid + "/page/" + pg + "/";
             String html = OkHttpUtil.string(url, getHeaders(url));
             Document doc = Jsoup.parse(html);
             JSONObject result = new JSONObject();
