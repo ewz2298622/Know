@@ -94,24 +94,21 @@ public class Panghu extends Spider {
     @Override
     public String homeContent(boolean filter) {
         try {
-            Document doc = Jsoup.parse(new URL(siteUrl).openStream(), "utf-8",OkHttpUtil.string(siteUrl, getHeaders(siteUrl)));
+            Document doc = Jsoup.parse(OkHttpUtil.string(siteUrl, getHeaders(siteUrl)));
             // 分类节点
-            Elements elements = doc.select("ul[class='navbar-items swiper-wrapper'] >li a");
+            Elements elements = doc.select("ul.navbar-items>li.navbar-item>a");
             JSONArray classes = new JSONArray();
             for (Element ele : elements) {
                 String name = ele.text();
-                boolean show = true;
-                if (filter) {
-                    show = name.equals("电影") ||
-                            name.equals("电视剧") ||
-                            name.equals("综艺") ||
-                            name.equals("动漫") ||
-                            name.equals("纪录片");
-                }
+                boolean show = name.equals("电影") ||
+                        name.equals("剧集") ||
+                        name.equals("动漫") ||
+                        name.equals("综艺");
                 if (show) {
                     Matcher mather = regexCategory.matcher(ele.attr("href"));
                     if (!mather.find())
                         continue;
+                    // 把分类的id和名称取出来加到列表里
                     String id = mather.group(1).trim();
                     JSONObject jsonObject = new JSONObject();
                     jsonObject.put("type_id", id);
