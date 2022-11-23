@@ -189,7 +189,7 @@ public class Panghu extends Spider {
             int page = -1;
 
             // 取页码相关信息
-            Elements pageInfo = doc.select(".stui-page li");
+            Elements pageInfo = doc.select("div[id=page]");
             if (pageInfo.size() == 0) {
                 page = Integer.parseInt(pg);
                 pageCount = page;
