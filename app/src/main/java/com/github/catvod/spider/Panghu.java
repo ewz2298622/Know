@@ -219,14 +219,14 @@ public class Panghu extends Spider {
             JSONArray videos = new JSONArray();
             if (!html.contains("没有找到您想要的结果哦")) {
                 // 取当前分类页的视频列表
-                Elements list = doc.select("div[class='module-items module-poster-items-base'] >a");
-                System.out.print("list++f" + list);
+                Element homeList = doc.select("div.module-main").get(0);
+                Elements list = homeList.select("div.module-items>a");
+                System.out.println("list..." + list);
+                JSONArray videos = new JSONArray();
                 for (int i = 0; i < list.size(); i++) {
                     Element vod = list.get(i);
                     String title = vod.attr("title");
-                    System.out.print("title++" + title);
                     String cover = vod.selectFirst("img.lazyload").attr("data-original");
-                    System.out.print("cover++" + cover);
                     String remark = vod.selectFirst("div.module-item-note").text();
                     Matcher matcher = regexVid.matcher(vod.attr("href"));
                     if (!matcher.find())
