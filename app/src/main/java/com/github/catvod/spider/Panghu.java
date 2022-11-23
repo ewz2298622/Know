@@ -191,29 +191,51 @@ public class Panghu extends Spider {
             int pageCount = 0;
             int page = -1;
             // 取页码相关信息
-            Elements pageInfo = doc.select("div[id='page'] > a:last-child");
-            if (pageInfo.size() > 0) {
-                String href = pageInfo.attr("href");
-                href = href.substring(9, href.length() - 4);
-                String pageCountNum = href.split("-")[9];
-                if (!TextUtils.isEmpty(pageCountNum)) {
-                    pageCount = Integer.parseInt(pageCountNum);
+            Elements pageInfo = doc.select("div[id=page]");
+            if (pageInfo.size() == 0) {
+                page = Integer.parseInt(pg);
+                pageCount = page;
+            } else {
+                for (int i = 0; i < pageInfo.size(); i++) {
+                    Element li = pageInfo.get(i);
+                    Element a = li.selectFirst("a");
+                    if (a == null)
+                        continue;
+                    String span = doc.select("span.page-current").text();
+                    String wy = doc.select("div[id=page] a").last().attr("href");
+                    if (page == -1) {
+                        page = Integer.parseInt(span);
+                    } else {
+                        page = 0;
+                    }
+                    Matcher matcher = regexPage.matcher(wy);
+                    if (matcher.find()) {
+                        pageCount = Integer.parseInt(matcher.group(1).split("-")[8]);
+                    } else {
+                        pageCount = 0;
+                    }
+                    break;
+
                 }
             }
-
             JSONArray videos = new JSONArray();
-            // 取当前分类页的视频列表
-            Elements list = doc.select("div.module-items > a[href*='v']");
-            for (int i = 0; i < list.size(); i++) {
-                Element vod = list.get(i);
-                String title = vod.attr("title");
-                String cover = vod.selectFirst("img").attr("data-original");
-                String remark = vod.selectFirst("div.module-item-note").text();
-                Matcher matcher = regexVoddetail.matcher(vod.attr("href"));
-                if (matcher.find()) {
-                    String vodId = matcher.group(1);
+            if (!html.contains("没有找到您想要的结果哦")) {
+                // 取当前分类页的视频列表
+                Elements list = doc.select("div.module-main div.module-items a");
+                for (int i = 0; i < list.size(); i++) {
+                    Element vod = list.get(i);
+                    String title = vod.selectFirst(".module-poster-item").attr("title");
+                    String cover = vod.selectFirst("div.module-item-cover div.module-item-pic img").attr("data-original");
+                    if (!TextUtils.isEmpty(cover) && !cover.startsWith("http")) {
+                        cover = siteUrl + cover;
+                    }
+                    String remark = vod.selectFirst("div.module-item-cover div.module-item-note").text();
+                    Matcher matcher = regexVid.matcher(vod.selectFirst(".module-poster-item").attr("href"));
+                    if (!matcher.find())
+                        continue;
+                    String id = matcher.group(1);
                     JSONObject v = new JSONObject();
-                    v.put("vod_id", vodId);
+                    v.put("vod_id", id);
                     v.put("vod_name", title);
                     v.put("vod_pic", cover);
                     v.put("vod_remarks", remark);
@@ -222,8 +244,8 @@ public class Panghu extends Spider {
             }
             result.put("page", page);
             result.put("pagecount", pageCount);
-            result.put("limit", 40);
-            result.put("total", pageCount <= 1 ? videos.length() : pageCount * 40);
+            result.put("limit", 48);
+            result.put("total", pageCount <= 1 ? videos.length() : pageCount * 48);
 
             result.put("list", videos);
             return result.toString();
