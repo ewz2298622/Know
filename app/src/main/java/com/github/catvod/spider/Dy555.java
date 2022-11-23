@@ -50,7 +50,7 @@ import okhttp3.Response;
 
 public class Dy555 extends Spider {
 
-    private static final String siteUrl = "https://www.555dianying.cc";
+    private static final String siteUrl = "http://www.panghuys.com";
 
     protected JSONObject playerConfig;
     protected JSONObject filterConfig;
@@ -127,7 +127,7 @@ public class Dy555 extends Spider {
             result.put("class", classes);
             try {
                 // 取首页推荐视频列表
-                Elements list = doc.select("div.module-items> a[href*='v']");
+                Elements list = doc.select("div.module-items> a[href*='voddetail']");
                 JSONArray videos = new JSONArray();
                 for (int i = 0; i < list.size(); i++) {
                     Element vod = list.get(i);
@@ -248,7 +248,7 @@ public class Dy555 extends Spider {
     public String detailContent(List<String> ids) {
         try {
             // 视频详情url
-            String url = siteUrl + "/v/" + ids.get(0) + ".html";
+            String url = siteUrl + "/voddetail/" + ids.get(0) + ".html";
             Document doc = Jsoup.parse(OkHttpUtil.string(url, getHeaders(siteUrl)));
             JSONObject result = new JSONObject();
             JSONObject vodList = new JSONObject();
@@ -335,7 +335,7 @@ public class Dy555 extends Spider {
     public String playerContent(String flag, String id, List<String> vipFlags) {
         try {
             // 播放页 url
-            String url = siteUrl + "/ph/" + id + ".html";
+            String url = siteUrl + "/vodplay/" + id + ".html";
             JSONObject result = new JSONObject();
             rs="";
             SpiderDebug.log(url );
