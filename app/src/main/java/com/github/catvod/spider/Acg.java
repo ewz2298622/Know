@@ -187,7 +187,7 @@ public class Acg extends Spider {
             int page = -1;
 
             // 取页码相关信息
-            Elements pageInfo = doc.select("div[id=page]");
+            Elements pageInfo = doc.select("div[id='page']");
             if (pageInfo.size() == 0) {
                 page = Integer.parseInt(pg);
                 pageCount = page;
@@ -197,8 +197,8 @@ public class Acg extends Spider {
                     Element a = li.selectFirst("a");
                     if (a == null)
                         continue;
-                    String span = doc.select("span.page-current").text();
-                    String wy = doc.select("div[id=page] a").last().attr("href");
+                    String span = pageInfo.select("span.page-current").text();
+                    String wy = doc.select("div[id='page'] a").last().attr("href");
                     if (page == -1) {
                         page = Integer.parseInt(span);
                     } else {
@@ -206,7 +206,7 @@ public class Acg extends Spider {
                     }
                     Matcher matcher = regexPage.matcher(wy);
                     if (matcher.find()) {
-                        pageCount = Integer.parseInt(matcher.group(1).split("-")[8]);
+                        pageCount = Integer.parseInt(matcher.group(1).trim());
                     } else {
                         pageCount = 0;
                     }
@@ -214,6 +214,7 @@ public class Acg extends Spider {
 
                 }
             }
+
             JSONArray videos = new JSONArray();
             if (!html.contains("没有找到您想要的结果哦")) {
                 // 取当前分类页的视频列表
