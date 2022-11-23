@@ -224,13 +224,10 @@ public class Panghu extends Spider {
                 Elements list = doc.select("div[class='module-items module-poster-items-base'] >a");
                 for (int i = 0; i < list.size(); i++) {
                     Element vod = list.get(i);
-                    String title = vod.selectFirst(".module-poster-item").attr("title");
-                    String cover = vod.selectFirst("div.module-item-cover div.module-item-pic img").attr("data-original");
-                    if (!TextUtils.isEmpty(cover) && !cover.startsWith("http")) {
-                        cover = siteUrl + cover;
-                    }
-                    String remark = vod.selectFirst("div.module-item-cover div.module-item-note").text();
-                    Matcher matcher = regexVid.matcher(vod.selectFirst(".module-poster-item").attr("href"));
+                    String title = vod.attr("title");
+                    String cover = vod.selectFirst("img.lazyload").attr("data-original");
+                    String remark = vod.selectFirst("div.module-item-note").text();
+                    Matcher matcher = regexVid.matcher(vod.attr("href"));
                     if (!matcher.find())
                         continue;
                     String id = matcher.group(1);
