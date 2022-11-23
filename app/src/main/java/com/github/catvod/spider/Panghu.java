@@ -191,33 +191,16 @@ public class Panghu extends Spider {
             int pageCount = 0;
             int page = -1;
             // 取页码相关信息
-            Elements pageInfo = doc.select("div[id=page]");
-            if (pageInfo.size() == 0) {
-                page = Integer.parseInt(pg);
-                pageCount = page;
-            } else {
-                for (int i = 0; i < pageInfo.size(); i++) {
-                    Element li = pageInfo.get(i);
-                    Element a = li.selectFirst("a");
-                    if (a == null)
-                        continue;
-                    String span = doc.select("span.page-current").text();
-                    String wy = doc.select("div[id=page] a").last().attr("href");
-                    if (page == -1) {
-                        page = Integer.parseInt(span);
-                    } else {
-                        page = 0;
-                    }
-                    Matcher matcher = regexPage.matcher(wy);
-                    if (matcher.find()) {
-                        pageCount = Integer.parseInt(matcher.group(1).split("-")[8]);
-                    } else {
-                        pageCount = 0;
-                    }
-                    break;
-
+            Elements pageInfo = doc.select("div[id='page'] > a:last-child");
+            if (pageInfo.size() > 0) {
+                String href = pageInfo.attr("href");
+                href = href.substring(9, href.length() - 4);
+                String pageCountNum = href.split("-")[9];
+                if (!TextUtils.isEmpty(pageCountNum)) {
+                    pageCount = Integer.parseInt(pageCountNum);
                 }
             }
+
             JSONArray videos = new JSONArray();
             // 取当前分类页的视频列表
             Elements list = doc.select("div.module-items > a[href*='v']");
@@ -239,8 +222,8 @@ public class Panghu extends Spider {
             }
             result.put("page", page);
             result.put("pagecount", pageCount);
-            result.put("limit", 48);
-            result.put("total", pageCount <= 1 ? videos.length() : pageCount * 48);
+            result.put("limit", 40);
+            result.put("total", pageCount <= 1 ? videos.length() : pageCount * 40);
 
             result.put("list", videos);
             return result.toString();
