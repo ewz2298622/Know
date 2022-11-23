@@ -162,18 +162,33 @@ public class Panghu extends Spider {
      * @param filter 同homeContent方法中的filter
      * @param extend 筛选参数{k:v, k1:v1}
      * @return
-     */
+     **/
     @Override
     public String categoryContent(String tid, String pg, boolean filter, HashMap<String, String> extend) {
         try {
-            // 获取分类数据的url
-            String url = siteUrl + "/whole/" + tid + "/page/" + pg + ".html";
+            String url = siteUrl + "/vodshow/";
+            if (extend != null && extend.size() > 0 && extend.containsKey("tid") && extend.get("tid").length() > 0) {
+                url += extend.get("tid");
+            } else {
+                url += tid;
+            }
+            if (extend != null && extend.size() > 0) {
+                for (Iterator<String> it = extend.keySet().iterator(); it.hasNext(); ) {
+                    String key = it.next();
+                    String value = extend.get(key);
+                    if (value.length() > 0) {
+                        url += "/" + key + "/" + URLEncoder.encode(value);
+                    }
+                }
+            }
+            url += "/page/" + pg + ".html";
             String html = OkHttpUtil.string(url, getHeaders(url));
             Document doc = Jsoup.parse(html);
             JSONObject result = new JSONObject();
             int pageCount = 0;
             int page = -1;
-
+            
+            // 取页码相关信息
             Elements pageInfo = doc.select("div[id=page]");
             if (pageInfo.size() == 0) {
                 page = Integer.parseInt(pg);
