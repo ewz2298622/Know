@@ -94,21 +94,24 @@ public class Panghu extends Spider {
     @Override
     public String homeContent(boolean filter) {
         try {
-            Document doc = Jsoup.parse(OkHttpUtil.string(siteUrl, getHeaders(siteUrl)));
+            Document doc = Jsoup.parse(new URL(siteUrl).openStream(), "utf-8",OkHttpUtil.string(siteUrl, getHeaders(siteUrl)));
             // 分类节点
-            Elements elements = doc.select("ul.navbar-items>li.navbar-item>a");
+            Elements elements = doc.select("ul[class='navbar-items swiper-wrapper'] >li a");
             JSONArray classes = new JSONArray();
             for (Element ele : elements) {
                 String name = ele.text();
-                boolean show = name.equals("电影") ||
-                        name.equals("剧集") ||
-                        name.equals("动漫") ||
-                        name.equals("综艺");
+                boolean show = true;
+                if (filter) {
+                    show = name.equals("电影") ||
+                            name.equals("剧集") ||
+                            name.equals("综艺") ||
+                            name.equals("动漫") ||
+                            name.equals("纪录片");
+                }
                 if (show) {
                     Matcher mather = regexCategory.matcher(ele.attr("href"));
                     if (!mather.find())
                         continue;
-                    // 把分类的id和名称取出来加到列表里
                     String id = mather.group(1).trim();
                     JSONObject jsonObject = new JSONObject();
                     jsonObject.put("type_id", id);
@@ -220,14 +223,16 @@ public class Panghu extends Spider {
             }
             JSONArray videos = new JSONArray();
             if (!html.contains("没有找到您想要的结果哦")) {
-                // 取当前分类页的视频列表
                 Elements list = doc.select("div[class='module-items module-poster-items-base'] >a");
                 for (int i = 0; i < list.size(); i++) {
                     Element vod = list.get(i);
-                    String title = vod.attr("title");
-                    String cover = vod.selectFirst("img.lazyload").attr("data-original");
-                    String remark = vod.selectFirst("div.module-item-note").text();
-                    Matcher matcher = regexVid.matcher(vod.attr("href"));
+                    String title = vod.selectFirst(".module-poster-item").attr("title");
+                    String cover = vod.selectFirst("div.module-item-cover div.module-item-pic img").attr("data-original");
+                    if (!TextUtils.isEmpty(cover) && !cover.startsWith("http")) {
+                        cover = siteUrl + cover;
+                    }
+                    String remark = vod.selectFirst("div.module-item-cover div.module-item-note").text();
+                    Matcher matcher = regexVid.matcher(vod.selectFirst(".module-poster-item").attr("href"));
                     if (!matcher.find())
                         continue;
                     String id = matcher.group(1);
