@@ -94,10 +94,9 @@ public class Panghu extends Spider {
     @Override
     public String homeContent(boolean filter) {
         try {
-            Document doc = Jsoup.parse(OkHttpUtil.string(siteUrl, getHeaders2(siteUrl,referer)));
+            Document doc = Jsoup.parse(OkHttpUtil.string(siteUrl, getHeaders(siteUrl)));
             // 分类节点
             Elements elements = doc.select("ul.navbar-items>li.navbar-item>a");
-            System.out.println("shouye" + elements);
             JSONArray classes = new JSONArray();
             for (Element ele : elements) {
                 String name = ele.text();
@@ -105,7 +104,6 @@ public class Panghu extends Spider {
                         name.equals("剧集") ||
                         name.equals("动漫") ||
                         name.equals("综艺");
-
                 if (show) {
                     Matcher mather = regexCategory.matcher(ele.attr("href"));
                     if (!mather.find())
