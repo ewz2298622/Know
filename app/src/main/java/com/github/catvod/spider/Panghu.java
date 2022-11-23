@@ -169,15 +169,31 @@ public class Panghu extends Spider {
     @Override
     public String categoryContent(String tid, String pg, boolean filter, HashMap<String, String> extend) {
         try {
+            String url = siteUrl + "/vodshow/id/";
+            if (extend != null && extend.size() > 0 && extend.containsKey("tid") && extend.get("tid").length() > 0) {
+                url += extend.get("tid");
+            } else {
+                url += tid;
+            }
+            if (extend != null && extend.size() > 0) {
+                for (Iterator<String> it = extend.keySet().iterator(); it.hasNext(); ) {
+                    String key = it.next();
+                    String value = extend.get(key);
+                    if (value.length() > 0) {
+                        url += "/" + key + "/" + URLEncoder.encode(value);
+                    }
+                }
+            }
+            url += "/page/" + pg + ".html";
             // 获取分类数据的url
-            String url = siteUrl + "/vodshow/" + tid + "/page/" + pg + ".html";
+            //String url = siteUrl + "/show/" + tid + "/page/" + pg + "/";
             String html = OkHttpUtil.string(url, getHeaders(url));
             Document doc = Jsoup.parse(html);
             JSONObject result = new JSONObject();
             int pageCount = 0;
             int page = -1;
             // 取页码相关信息
-            Elements pageInfo = doc.select("div[id='page'] a");
+            Elements pageInfo = doc.select("div[id='page']");
             if (pageInfo.size() == 0) {
                 page = Integer.parseInt(pg);
                 pageCount = page;
@@ -187,45 +203,37 @@ public class Panghu extends Spider {
                     Element a = li.selectFirst("a");
                     if (a == null)
                         continue;
-                    String name = a.text();
-                    if (page == -1 && li.hasClass("page-current")) {
-                        Matcher matcher = regexPage.matcher(a.attr("href"));
-                        if (matcher.find()) {
-                            page = Integer.parseInt(matcher.group(1).split("-")[8]);
-                        } else {
-                            page = 0;
-                        }
+                    String span = pageInfo.select("span.page-current").text();
+                    String wy = doc.select("div[id=page] a").last().attr("href");
+                    if (page == -1) {
+                        page = Integer.parseInt(span);
+                    } else {
+                        page = 0;
                     }
-                    if (name.equals("尾页")) {
-                        Matcher matcher = regexPage.matcher(a.attr("href"));
-                        if (matcher.find()) {
-                            pageCount = Integer.parseInt(matcher.group(1).split("-")[8]);
-                        } else {
-                            pageCount = 0;
-                        }
-                        break;
+                    Matcher matcher = regexPage.matcher(wy);
+                    if (matcher.find()) {
+                        pageCount = Integer.parseInt(matcher.group(1).trim());
+                    } else {
+                        pageCount = 0;
                     }
+                    break;
+
                 }
             }
 
             JSONArray videos = new JSONArray();
-            if (!html.contains("没有找到您想要的结果哦")) {
-                // 取当前分类页的视频列表
-                Elements list = doc.select("div[class='module-items module-poster-items-base'] >a");
-                for (int i = 0; i < list.size(); i++) {
-                    Element vod = list.get(i);
-                    String title = vod.selectFirst(".module-poster-item").attr("title");
-                    String cover = vod.selectFirst("div.module-item-cover div.module-item-pic img").attr("data-original");
-                    if (!TextUtils.isEmpty(cover) && !cover.startsWith("http")) {
-                        cover = siteUrl + cover;
-                    }
-                    String remark = vod.selectFirst("div.module-item-cover div.module-item-note").text();
-                    Matcher matcher = regexVid.matcher(vod.selectFirst(".module-poster-item").attr("href"));
-                    if (!matcher.find())
-                        continue;
-                    String id = matcher.group(1);
+            // 取当前分类页的视频列表
+            Elements list = doc.select("div.module-items > a[href*='v']");
+            for (int i = 0; i < list.size(); i++) {
+                Element vod = list.get(i);
+                String title = vod.attr("title");
+                String cover = vod.selectFirst("img").attr("data-original");
+                String remark = vod.selectFirst("div.module-item-note").text();
+                Matcher matcher = regexVoddetail.matcher(vod.attr("href"));
+                if (matcher.find()) {
+                    String vodId = matcher.group(1);
                     JSONObject v = new JSONObject();
-                    v.put("vod_id", id);
+                    v.put("vod_id", vodId);
                     v.put("vod_name", title);
                     v.put("vod_pic", cover);
                     v.put("vod_remarks", remark);
