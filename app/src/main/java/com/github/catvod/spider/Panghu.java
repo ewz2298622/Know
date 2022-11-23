@@ -103,9 +103,10 @@ public class Panghu extends Spider {
                 boolean show = true;
                 if (filter) {
                     show = name.equals("电影") ||
-                            name.equals("剧集") ||
+                            name.equals("电视剧") ||
                             name.equals("综艺") ||
-                            name.equals("动漫");
+                            name.equals("动漫") ||
+                            name.equals("纪录片");
                 }
                 if (show) {
                     Matcher mather = regexCategory.matcher(ele.attr("href"));
