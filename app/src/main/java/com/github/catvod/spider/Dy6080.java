@@ -293,7 +293,7 @@ public class Dy6080 extends Spider {
                 boolean found = false;
                 for (Iterator<String> it = playerConfig.keys(); it.hasNext(); ) {
                     String flag = it.next();
-                    if (playerConfig.getJSONObject(flag).getString("sh").equals(sourceName)) {
+                    if (playerConfig.getJSONObject(flag).getString("show").equals(sourceName)) {
                         sourceName = flag;
                         found = true;
                         break;
@@ -355,17 +355,16 @@ public class Dy6080 extends Spider {
     public String playerContent(String flag, String id, List<String> vipFlags) {
         try {
             //定义播放用的headers
-         //   JSONObject headers = new JSONObject();
-            //headers.put("Host", " cokemv.co");
-       //     headers.put("origin", " https://www.jpys.me");
-       //     headers.put("User-Agent", " Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36");
-       //     headers.put("Accept", " */*");
-       //     headers.put("Accept-Language", " zh-CN,zh;q=0.9,en-US;q=0.3,en;q=0.7");
-        //    headers.put("Accept-Encoding", " gzip, deflate");
 
+            String url = siteUrl + "/vplay/" + id + ".html";
+           // JSONObject headers = new JSONObject();
+           // headers.put("origin", " https://www.jubaibai.me/");
+           // headers.put("User-Agent", " Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36");
+          //  headers.put("Accept", " */*");
+        //     headers.put("Accept-Language", " zh-CN,zh;q=0.9,en-US;q=0.3,en;q=0.7");
+         //   headers.put("Accept-Encoding", " gzip, deflate");
 
             // 播放页 url
-            String url = siteUrl + "/vodplay/" + id + ".html";
             Elements allScript = Jsoup.parse(OkHttpUtil.string(url, getHeaders(url))).select("script");
             JSONObject result = new JSONObject();
             for (int i = 0; i < allScript.size(); i++) {
@@ -405,14 +404,14 @@ public class Dy6080 extends Spider {
                             String video_url = matcher1.group(1);
                             String video_token = matcher2.group(1);
                             String video_key = matcher3.group(1);                          
-                            String video_sign= "F4penExTGogdt6U8" ;
+                    //        String video_sign= "F4penExTGogdt6U8" ;
                             String video_tm = String.valueOf(System.currentTimeMillis()/ 1000);
                             HashMap hashMap = new HashMap();
-                            hashMap.put("token", video_token);
+                    //        hashMap.put("token", video_token);
                             hashMap.put("tm", video_tm);
                             hashMap.put("url", video_url);
                             hashMap.put("vkey", video_key);
-                             hashMap.put("sign", video_sign);
+                    //         hashMap.put("sign", video_sign);
                             OkHttpUtil.get(OkHttpUtil.defaultClient(), "https://play.shcpin.com/xplay/555tZ4pvzHE3BpiO838.php", hashMap, new OKCallBack.OKCallBackString() {
                                 @Override
                                 protected void onFailure(Call call, Exception exc) {
