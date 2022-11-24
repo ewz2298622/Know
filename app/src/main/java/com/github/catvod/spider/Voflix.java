@@ -298,11 +298,13 @@ public class Voflix extends Spider {
                 }
             });
             // 取播放列表数据
-            Elements sources = doc.select("div.module-tab-content div span");
+            Elements sources = doc.select("div.module-tab-content").get(0).select("div > span");
+            //System.out.println(sources.size());
             Elements sourceList = doc.select("div.module-player-list");
-
+            //System.out.println(sourceList.size());
             for (int i = 0; i < sources.size(); i++) {
                 Element source = sources.get(i);
+                //System.out.println(sources.text().split("：")[0].split("』")[1]);
                 String sourceName = source.text();
                 boolean found = false;
                 for (Iterator<String> it = playerConfig.keys(); it.hasNext(); ) {
@@ -316,7 +318,8 @@ public class Voflix extends Spider {
                 if (!found)
                     continue;
                 String playList = "";
-                Elements playListA = sourceList.get(i).select("div a");
+                Elements playListA = sourceList.get(i).select(".scroll-content > a");
+                //System.out.println(playListA.size());
                 List<String> vodItems = new ArrayList<>();
 
                 for (int j = 0; j < playListA.size(); j++) {
@@ -325,8 +328,7 @@ public class Voflix extends Spider {
                     if (!matcher.find())
                         continue;
                     String playURL = matcher.group(1) + "-" + matcher.group(2) + "-" + matcher.group(3);
-                    String vodName = vod.select("span").text();
-                    vodItems.add(vodName + "$" + playURL);
+                    vodItems.add(vod.text() + "$" + playURL);
                 }
                 if (vodItems.size() > 0)
                     playList = TextUtils.join("#", vodItems);
