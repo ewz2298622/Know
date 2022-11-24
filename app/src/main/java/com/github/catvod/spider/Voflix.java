@@ -181,7 +181,7 @@ public class Voflix extends Spider {
                 }
             }
             // 获取分类数据的url
-            String url = siteUrl + "/vodshow/" + TextUtils.join("-", urlParams) + ".html";
+            String url = siteUrl + "/show/" + TextUtils.join("-", urlParams) + ".html";
             String html = OkHttpUtil.string(url, getHeaders(url));
             Document doc = Jsoup.parse(html);
             JSONObject result = new JSONObject();
@@ -266,13 +266,13 @@ public class Voflix extends Spider {
             JSONObject vodList = new JSONObject();
 
             // 取基本数据
-            String cover = doc.select("div.module-item-pic > img").attr("data-src");
-            String title = doc.select("div.video-info-header > h1.page-title").text();
+            String cover = doc.select(" div.module-item-pic  img").attr("data-original");
+            String title = doc.select(" div.module-info-heading  h1").text();
             String category = "", area = "", year = "", remark = "", director = "", actor = "", desc = "";
     
             Elements span_text_muted = doc.select("div.module-info-items div.module-info-item  span");
            year = doc.selectFirst("div.module-info-tag > div > a").text();
-            desc = doc.selectFirst("div.div.video-info-content span").text().trim();
+            desc = doc.selectFirst("div.module-info-introduction-content p").text().trim();
             for (int i = 0; i < span_text_muted.size(); i++) {
                 Element text = span_text_muted.get(i);
                 String info = text.text();
