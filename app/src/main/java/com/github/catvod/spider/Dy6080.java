@@ -128,15 +128,15 @@ public class Dy6080 extends Spider {
             result.put("class", classes);
             try {
                 // 取首页推荐视频列表
-                Element homeList = doc.select("div.module-main.scroll-box").get(0);
-                Elements list = homeList.select("div.module-items.module-poster-items-small.scroll-content a");
+                Element homeList = doc.select("div.module-items").get(0);
+                Elements list = homeList.select("div.module-item");
                 JSONArray videos = new JSONArray();
                 for (int i = 0; i < list.size(); i++) {
                     Element vod = list.get(i);
-                    String title = vod.select("a").attr("title");
-                    String cover = vod.select("img.lazy.lazyload").attr("data-original");
-                    String remark = vod.select("div.module-item-note").text();
-                    Matcher matcher = regexVid.matcher(vod.select("a").attr("href"));
+                    String title = vod.select("div.module-item-titlebox a").attr("title");
+                    String cover = vod.select("img.lazy lazyloaded").attr("data-src");
+                    String remark = vod.select("div.module-item-text").text();
+                    Matcher matcher = regexVid.matcher(vod.select("div.module-item-titlebox a").attr("href"));
                     if (!matcher.find())
                         continue;
                     String id = matcher.group(1);
