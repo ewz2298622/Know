@@ -101,17 +101,14 @@ public class Dy6080 extends Spider {
         try {
             Document doc = Jsoup.parse(OkHttpUtil.string(siteUrl, getHeaders(siteUrl)));
             // 分类节点
-            Elements elements = doc.select("ul.navbar-items>li.navbar-item>a");
+            Elements elements = doc.select("ul.nav-menu-items>li.nav-menu-item>a");
             JSONArray classes = new JSONArray();
             for (Element ele : elements) {
                 String name = ele.text();
                 boolean show = name.equals("电影") ||
-                        name.equals("剧集") ||
+                        name.equals("电视剧") ||
                         name.equals("动漫") ||
-                        name.equals("综艺") ||
-                        name.equals("国产剧") ||
-                        name.equals("日韩剧") ||
-                        name.equals("欧美剧");
+                        name.equals("综艺");
                 if (show) {
                     Matcher mather = regexCategory.matcher(ele.attr("href"));
                     if (!mather.find())
