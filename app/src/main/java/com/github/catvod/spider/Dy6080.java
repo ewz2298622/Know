@@ -293,7 +293,7 @@ public class Dy6080 extends Spider {
                 boolean found = false;
                 for (Iterator<String> it = playerConfig.keys(); it.hasNext(); ) {
                     String flag = it.next();
-                    if (playerConfig.getJSONObject(flag).getString("show").equals(sourceName)) {
+                    if (playerConfig.getJSONObject(flag).getString("sh").equals(sourceName)) {
                         sourceName = flag;
                         found = true;
                         break;
@@ -347,10 +347,10 @@ public class Dy6080 extends Spider {
      * @param vipFlags 所有可能需要vip解析的源
      * @return
      */
-    private final Pattern urlt = Pattern.compile("\"url\": *\"([^\"]*)\",");
+     private final Pattern urlt = Pattern.compile("\"url\": *\"([^\"]*)\",");
     private final Pattern token = Pattern.compile("\"token\": *\"([^\"]*)\"");
-    private final Pattern key = Pattern.compile("\"key\": *\"([^\"]*)\",");
-    private final Pattern time = Pattern.compile("\"time\": *\"([^\"]*)\",");
+    private final Pattern vkey = Pattern.compile("\"vkey\": *\"([^\"]*)\",");
+//    private final Pattern tm = Pattern.compile("\"tm\": *\"([^\"]*)\",");
     @Override
     public String playerContent(String flag, String id, List<String> vipFlags) {
         try {
@@ -374,20 +374,20 @@ public class Dy6080 extends Spider {
                     int end = scContent.lastIndexOf('}') + 1;
                     String json = scContent.substring(start, end);
                     JSONObject player = new JSONObject(json);
-                    System.out.println("pla" + player);
+                 //   System.out.println("pla" + player);
                     if (playerConfig.has(player.getString("from"))) {
                         JSONObject pCfg = playerConfig.getJSONObject(player.getString("from"));
-                        System.out.println("pc" + pCfg);
+                     //   System.out.println("pc" + pCfg);
                         String videoUrl = player.getString("url");
-                        String playUrl = pCfg.getString("parse");
+                    //    String playUrl = pCfg.getString("parse");
                         String show = pCfg.getString("show");
                         if (show.contains("VOFLIX")) {
                        String jxurl = "https://play.shcpin.com/xplay/?url=" + videoUrl;
                        System.out.println("jx" + jxurl);
                        HashMap<String, String> headers = new HashMap<>();
-                            headers.put("referer", siteUrl);
+                        //    headers.put("referer", siteUrl);
                        Document doc = Jsoup.parse(OkHttpUtil.string(jxurl,headers));
-                       System.out.println("zh" + doc);
+                     //  System.out.println("zh" + doc);
                         Elements script = doc.select("body>script");
                         for (int j = 0; j < script.size(); j++) {
                           String content = script.get(j).html().trim();
@@ -404,14 +404,14 @@ public class Dy6080 extends Spider {
                             String video_url = matcher1.group(1);
                             String video_token = matcher2.group(1);
                             String video_key = matcher3.group(1);                          
-                    //        String video_sign= "F4penExTGogdt6U8" ;
+                        //    String video_sign= "F4penExTGogdt6U8" ;
                             String video_tm = String.valueOf(System.currentTimeMillis()/ 1000);
                             HashMap hashMap = new HashMap();
-                    //        hashMap.put("token", video_token);
+                      //      hashMap.put("token", video_token);
                             hashMap.put("tm", video_tm);
                             hashMap.put("url", video_url);
                             hashMap.put("vkey", video_key);
-                    //         hashMap.put("sign", video_sign);
+                        //    hashMap.put("sign", video_sign);
                             OkHttpUtil.get(OkHttpUtil.defaultClient(), "https://play.shcpin.com/xplay/555tZ4pvzHE3BpiO838.php", hashMap, new OKCallBack.OKCallBackString() {
                                 @Override
                                 protected void onFailure(Call call, Exception exc) {
