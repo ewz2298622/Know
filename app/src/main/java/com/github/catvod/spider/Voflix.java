@@ -261,65 +261,87 @@ public class Voflix extends Spider {
         try {
             // 视频详情url
             String url = siteUrl + "/video/" + ids.get(0) + ".html";
+            //System.out.println(url);
             Document doc = Jsoup.parse(OkHttpUtil.string(url, getHeaders(url)));
             JSONObject result = new JSONObject();
             JSONObject vodList = new JSONObject();
 
             // 取基本数据
-            String cover = doc.select(" div.module-item-pic img").attr("data-src");
-            String title = doc.select(" div.video-info-header  h1").text();
-            String category = "", area = "", year = "", remark = "", director = "", actor = "", desc = "";
-    
-            Elements span_text_muted = doc.select("div.module-info-items div.module-info-item  span");
-           year = doc.selectFirst("div.module-info-tag > div > a").text();
-            desc = doc.selectFirst("div.video-info-content span").text().trim();
+            String cover = doc.selectFirst("div.module-item-cover div.module-item-pic > img").attr("data-src");
+            String title = doc.selectFirst("div.video-cover .module-item-pic > a").attr("alt");
+            String desc = Jsoup.parse(doc.selectFirst("meta[name=description]").attr("content")).text();
+            String category = "", area = "", year = "", remark = "", director = "", actor = "";
+            Elements span_text_muted = doc.select("div.video-info-main span.video-info-itemtitle");
             for (int i = 0; i < span_text_muted.size(); i++) {
                 Element text = span_text_muted.get(i);
                 String info = text.text();
-                if (info.equals("更新：")) {
+                if (info.equals("分类：")) {
+                    category = text.nextElementSibling().text();
+                } else if (info.equals("上映：")) {
+                    year = text.nextElementSibling().text();
+                } else if (info.equals("地区：")) {
+                    area = text.nextElementSibling().text();
+                } else if (info.equals("更新：")) {
                     remark = text.nextElementSibling().text();
-                    System.out.println("rma" + remark);
                 } else if (info.equals("导演：")) {
                     List<String> directors = new ArrayList<>();
-                    Elements aa = text.parent().select("div.module-info-item-content a");
+                    Elements aa = text.parent().select("a");
                     for (int j = 0; j < aa.size(); j++) {
                         directors.add(aa.get(j).text());
                     }
                     director = TextUtils.join(",", directors);
                 } else if (info.equals("主演：")) {
                     List<String> actors = new ArrayList<>();
-                    Elements aa = text.parent().select("div.module-info-item-content a");
+                    Elements aa = text.parent().select("a");
                     for (int j = 0; j < aa.size(); j++) {
                         actors.add(aa.get(j).text());
                     }
                     actor = TextUtils.join(",", actors);
                 }
             }
+
             vodList.put("vod_id", ids.get(0));
             vodList.put("vod_name", title);
             vodList.put("vod_pic", cover);
-         //   vodList.put("type_name", category);
+            vodList.put("type_name", category);
             vodList.put("vod_year", year);
-         //   vodList.put("vod_area", area);
+            vodList.put("vod_area", area);
             vodList.put("vod_remarks", remark);
             vodList.put("vod_actor", actor);
             vodList.put("vod_director", director);
             vodList.put("vod_content", desc);
+            //System.out.println(vodList.toString());
+            Map<String, String> vod_play = new TreeMap<>(new Comparator<String>() {
+                @Override
+                public int compare(String o1, String o2) {
+                    try {
+                        int sort1 = playerConfig.getJSONObject(o1).getInt("or");
+                        int sort2 = playerConfig.getJSONObject(o2).getInt("or");
 
-            Map<String, String> vod_play = new LinkedHashMap<>();
+                        if (sort1 == sort2) {
+                            return 1;
+                        }
+                        return sort1 - sort2 > 0 ? 1 : -1;
+                    } catch (JSONException e) {
+                        SpiderDebug.log(e);
+                    }
+                    return 1;
+                }
+            });
 
             // 取播放列表数据
-            Elements sources = doc.select("div[id='y-playList'] span");
-
-            Elements sourceList = doc.select("div.module-play-list");
-
+            Elements sources = doc.select("div.module-tab-content").get(0).select("div > span");
+            //System.out.println(sources.size());
+            Elements sourceList = doc.select("div.module-player-list");
+            //System.out.println(sourceList.size());
             for (int i = 0; i < sources.size(); i++) {
                 Element source = sources.get(i);
+                //System.out.println(sources.text().split("：")[0].split("』")[1]);
                 String sourceName = source.text();
                 boolean found = false;
                 for (Iterator<String> it = playerConfig.keys(); it.hasNext(); ) {
                     String flag = it.next();
-                    if (playerConfig.getJSONObject(flag).getString("show").equals(sourceName)) {
+                    if (playerConfig.getJSONObject(flag).getString("sh").equals(sourceName)) {
                         sourceName = flag;
                         found = true;
                         break;
@@ -328,13 +350,13 @@ public class Voflix extends Spider {
                 if (!found)
                     continue;
                 String playList = "";
-                Elements playListA = sourceList.get(i).select("a.module-play-list-link ");
+                Elements playListA = sourceList.get(i).select(".scroll-content > a");
+                //System.out.println(playListA.size());
                 List<String> vodItems = new ArrayList<>();
 
                 for (int j = 0; j < playListA.size(); j++) {
                     Element vod = playListA.get(j);
                     Matcher matcher = regexPlay.matcher(vod.attr("href"));
-
                     if (!matcher.find())
                         continue;
                     String playURL = matcher.group(1) + "-" + matcher.group(2) + "-" + matcher.group(3);
@@ -345,6 +367,7 @@ public class Voflix extends Spider {
 
                 if (playList.length() == 0)
                     continue;
+
                 vod_play.put(sourceName, playList);
             }
 
