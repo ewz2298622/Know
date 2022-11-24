@@ -261,14 +261,44 @@ public class Voflix extends Spider {
         try {
             // 视频详情url
             String url = siteUrl + "/video/" + ids.get(0) + ".html";
+            //System.out.println(url);
             Document doc = Jsoup.parse(OkHttpUtil.string(url, getHeaders(url)));
             JSONObject result = new JSONObject();
             JSONObject vodList = new JSONObject();
+
             // 取基本数据
-            String cover = doc.selectFirst("div.module-item-pic > img").attr("data-src");
+            String cover = doc.selectFirst("div.module-item-cover div.module-item-pic > img").attr("data-src");
             String title = doc.selectFirst("div.video-info-header > h1.page-title").text();
             String desc = doc.select("div.video-info-content").text();
             String category = "", area = "", year = "", remark = "", director = "", actor = "";
+            Elements span_text_muted = doc.select("div.video-info-main span.video-info-itemtitle");
+            for (int i = 0; i < span_text_muted.size(); i++) {
+                Element text = span_text_muted.get(i);
+                String info = text.text();
+                if (info.equals("分类：")) {
+                    category = text.nextElementSibling().text();
+                } else if (info.equals("上映：")) {
+                    year = text.nextElementSibling().text();
+                } else if (info.equals("地区：")) {
+                    area = text.nextElementSibling().text();
+                } else if (info.equals("更新：")) {
+                    remark = text.nextElementSibling().text();
+                } else if (info.equals("导演：")) {
+                    List<String> directors = new ArrayList<>();
+                    Elements aa = text.parent().select("a");
+                    for (int j = 0; j < aa.size(); j++) {
+                        directors.add(aa.get(j).text());
+                    }
+                    director = TextUtils.join(",", directors);
+                } else if (info.equals("主演：")) {
+                    List<String> actors = new ArrayList<>();
+                    Elements aa = text.parent().select("a");
+                    for (int j = 0; j < aa.size(); j++) {
+                        actors.add(aa.get(j).text());
+                    }
+                    actor = TextUtils.join(",", actors);
+                }
+            }
 
             vodList.put("vod_id", ids.get(0));
             vodList.put("vod_name", title);
@@ -280,6 +310,7 @@ public class Voflix extends Spider {
             vodList.put("vod_actor", actor);
             vodList.put("vod_director", director);
             vodList.put("vod_content", desc);
+            //System.out.println(vodList.toString());
             Map<String, String> vod_play = new TreeMap<>(new Comparator<String>() {
                 @Override
                 public int compare(String o1, String o2) {
@@ -297,6 +328,7 @@ public class Voflix extends Spider {
                     return 1;
                 }
             });
+
             // 取播放列表数据
             Elements sources = doc.select("div.module-tab-content").get(0).select("div > span");
             //System.out.println(sources.size());
