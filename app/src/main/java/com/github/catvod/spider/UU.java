@@ -267,77 +267,28 @@ public class UU extends Spider {
     public String detailContent(List<String> ids) {
         try {
             // 视频详情url
-            String url = siteUrl + "/vod/detail/" + ids.get(0) + ".html";
+            String url = siteUrl + "/voddetail/" + ids.get(0) + ".html";
             Document doc = Jsoup.parse(OkHttpUtil.string(url, getHeaders(url)));
             JSONObject result = new JSONObject();
             JSONObject vodList = new JSONObject();
 
-            String cover = FixUrl(pic, doc.selectFirst("div.module-info-poster div div img").attr("data-original"));
-            String title = doc.selectFirst("div.module-info-heading h1").text();
+            // 取基本数据
+            String cover = doc.selectFirst("div.module-main div.module-item-pic img").attr("data-original");
 
-            String category = "", area = "", year = "", director = "", actor = "", remark = "", desc = "";
+            String title = doc.selectFirst("div.module-info-heading > h1").text();
 
-            category = doc.select("div.module-info-tag-link").get(2).text();
-            year = doc.select("div.module-info-tag-link a").get(0).text();
-            area = doc.select("div.module-info-tag-link a").get(1).text();
-            desc = doc.select("div.module-info-introduction-content p").text();
-
-            Elements span_text_muted = doc.select("div.module-info-item span");
-            for (int i = 0; i < span_text_muted.size() - 2; i++) {
-                Element Spantext = span_text_muted.get(i);
-                String info = Spantext.text();
-                if (info.contains("更新：")) {
-                    try {
-                        remark = Spantext.parent().select("div").text();
-                    } catch (Exception e) {
-                        remark = "";
-                    }
-                } else if (info.contains("导演：")) {
-                    try {
-                        director = Spantext.parent().select("div a").text();
-                    } catch (Exception e) {
-                        director = "";
-                    }
-                } else if (info.contains("主演：")) {
-                    try {
-                        actor = Spantext.parent().select("div a").text();
-                    } catch (Exception e) {
-                        actor = "";
-                    }
-                }
-            }
-
+            String desc = doc.selectFirst("div.module-blocklist > span").text();
+            System.out.println("co" + desc);
             vodList.put("vod_id", ids.get(0));
             vodList.put("vod_name", title);
             vodList.put("vod_pic", cover);
-            vodList.put("type_name", category);
-            vodList.put("vod_year", year);
-            vodList.put("vod_area", area);
-            vodList.put("vod_remarks", remark);
-            vodList.put("vod_actor", actor);
-            vodList.put("vod_director", director);
             vodList.put("vod_content", desc);
 
-            Map<String, String> vod_play = new TreeMap<>(new Comparator<String>() {
-                @Override
-                public int compare(String o1, String o2) {
-                    try {
-                        int sort1 = playerConfig.getJSONObject(o1).getInt("or");
-                        int sort2 = playerConfig.getJSONObject(o2).getInt("or");
-
-                        if (sort1 == sort2) {
-                            return 1;
-                        }
-                        return sort1 - sort2 > 0 ? 1 : -1;
-                    } catch (JSONException e) {
-                        SpiderDebug.log(e);
-                    }
-                    return 1;
-                }
-            });
+            Map<String, String> vod_play = new LinkedHashMap<>();
 
             // 取播放列表数据
-            Elements sources = doc.select("div.module-tab-items-box div span");
+            Elements sources = doc.select("div[id='y-playList'] span");
+
             Elements sourceList = doc.select("div.module-play-list");
 
             for (int i = 0; i < sources.size(); i++) {
@@ -346,7 +297,7 @@ public class UU extends Spider {
                 boolean found = false;
                 for (Iterator<String> it = playerConfig.keys(); it.hasNext(); ) {
                     String flag = it.next();
-                    if (playerConfig.getJSONObject(flag).getString("sh").equals(sourceName)) {
+                    if (playerConfig.getJSONObject(flag).getString("show").equals(sourceName)) {
                         sourceName = flag;
                         found = true;
                         break;
@@ -355,24 +306,23 @@ public class UU extends Spider {
                 if (!found)
                     continue;
                 String playList = "";
-                Elements playListA = sourceList.get(i).select("div a");
+                Elements playListA = sourceList.get(i).select("a.module-play-list-link ");
                 List<String> vodItems = new ArrayList<>();
 
                 for (int j = 0; j < playListA.size(); j++) {
                     Element vod = playListA.get(j);
                     Matcher matcher = regexPlay.matcher(vod.attr("href"));
+
                     if (!matcher.find())
                         continue;
                     String playURL = matcher.group(1) + "-" + matcher.group(2) + "-" + matcher.group(3);
-                    String vodName = vod.select("span").text();
-                    vodItems.add(vodName + "$" + playURL);
+                    vodItems.add(vod.text() + "$" + playURL);
                 }
                 if (vodItems.size() > 0)
                     playList = TextUtils.join("#", vodItems);
 
                 if (playList.length() == 0)
                     continue;
-
                 vod_play.put(sourceName, playList);
             }
 
