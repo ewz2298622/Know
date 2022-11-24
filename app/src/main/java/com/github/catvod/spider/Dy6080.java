@@ -381,8 +381,8 @@ public class Dy6080 extends Spider {
                         String videoUrl = player.getString("url");
                     //    String playUrl = pCfg.getString("parse");
                         String show = pCfg.getString("show");
-                        if (show.contains("VOFLIX")) {
-                       String jxurl = "https://play.shcpin.com/xplay/?url=" + videoUrl;
+                        if (show.contains("BYGA")) {
+                       String jxurl = "https://jx1.bw66.xyz/m3u8/?url=" + videoUrl;
                        System.out.println("jx" + jxurl);
                        HashMap<String, String> headers = new HashMap<>();
                         //    headers.put("referer", siteUrl);
@@ -412,7 +412,7 @@ public class Dy6080 extends Spider {
                             hashMap.put("url", video_url);
                             hashMap.put("key", video_key);
                         //    hashMap.put("sign", video_sign);
-                            OkHttpUtil.get(OkHttpUtil.defaultClient(), "https://play.shcpin.com/xplay/555tZ4pvzHE3BpiO838.php", hashMap, new OKCallBack.OKCallBackString() {
+                            OkHttpUtil.get(OkHttpUtil.defaultClient(), "https://jx1.bw66.xyz/m3u8/API.php", hashMap, new OKCallBack.OKCallBackString() {
                                 @Override
                                 protected void onFailure(Call call, Exception exc) {
                                 }
