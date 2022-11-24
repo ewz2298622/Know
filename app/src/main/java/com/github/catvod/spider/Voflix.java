@@ -33,8 +33,8 @@ import okhttp3.Call;
 import okhttp3.Headers;
 
 public class Voflix extends Spider {
-    private static final String siteUrl = "https://www.6080dy1.com";
-    private static final String siteHost = "www.6080dy1.com";
+    private static final String siteUrl = "https://www.voflix.com";
+    private static final String siteHost = "www.voflix.com";
 
     /**
      * 播放源配置
@@ -44,10 +44,10 @@ public class Voflix extends Spider {
      * 筛选配置
      */
     private JSONObject filterConfig;
-    private Pattern regexCategory = Pattern.compile("/vodtype/(\\d+).html");
-    private Pattern regexVid = Pattern.compile("/video/(\\d+).html");
-    private Pattern regexPlay = Pattern.compile("/vplay/(\\d+)-(\\d+)-(\\d+).html");
-    private Pattern regexPage = Pattern.compile("/vodshow/(\\S+).html");
+    private Pattern regexCategory = Pattern.compile("/type/(\\d+).html");
+    private Pattern regexVid = Pattern.compile("/detail/(\\d+).html");
+    private Pattern regexPlay = Pattern.compile("/play/(\\d+)-(\\d+)-(\\d+).html");
+    private Pattern regexPage = Pattern.compile("/show/(\\S+).html");
 
     @Override
     public void init(Context context) {
@@ -106,9 +106,12 @@ public class Voflix extends Spider {
             for (Element ele : elements) {
                 String name = ele.text();
                 boolean show = name.equals("电影") ||
-                        name.equals("电视剧") ||
+                        name.equals("剧集") ||
                         name.equals("动漫") ||
-                        name.equals("综艺");
+                        name.equals("综艺") ||
+                        name.equals("国产剧") ||
+                        name.equals("日韩剧") ||
+                        name.equals("欧美剧");
                 if (show) {
                     Matcher mather = regexCategory.matcher(ele.attr("href"));
                     if (!mather.find())
@@ -128,15 +131,15 @@ public class Voflix extends Spider {
             result.put("class", classes);
             try {
                 // 取首页推荐视频列表
-                Element homeList = doc.select("div.module-items div.module-item").get(0);
-                Elements list = homeList.select("div.module-item-cover div.module-item-pic");
+                Element homeList = doc.select("div.module-items").get(0);
+                Elements list = homeList.select("div.module-item");
                 JSONArray videos = new JSONArray();
                 for (int i = 0; i < list.size(); i++) {
                     Element vod = list.get(i);
-                    String title = vod.select("a").attr("title");
-                    String cover = vod.select("img.lazy lazyloaded").attr("data-src");
-                    String remark = vod.select("div.module-item-text").text();
-                    Matcher matcher = regexVid.matcher(vod.select("a").attr("href"));
+                    String title = vod.select("div.module-item-cover div.module-item-pic a").attr("title");
+                    String cover = vod.select("div.module-item-cover div.module-item-pic img").attr("data-src");
+                    String remark = vod.select("div.module-item-note").text();
+                    Matcher matcher = regexVid.matcher(vod.select("div.module-item-cover div.module-item-pic a").attr("href"));
                     if (!matcher.find())
                         continue;
                     String id = matcher.group(1);
@@ -219,13 +222,13 @@ public class Voflix extends Spider {
             JSONArray videos = new JSONArray();
             if (!html.contains("没有找到您想要的结果哦")) {
                 // 取当前分类页的视频列表
-                Elements list = doc.select("div.module-items > div.module-item");
+                Elements list = doc.select("div.module-items.module-poster-items-base a ");
                 for (int i = 0; i < list.size(); i++) {
                     Element vod = list.get(i);
-                    String title = vod.selectFirst("div.module-item-titlebox a").text();
-                    String cover = vod.selectFirst("div.module-item-pic > img").attr("data-src");
-                    String remark = vod.selectFirst("div.module-item-text").text();
-                    Matcher matcher = regexVid.matcher(vod.selectFirst("div.module-item-titlebox a").attr("href"));
+                    String title = vod.select("a").attr("title");
+                    String cover = vod.select("img.lazy.lazyload").attr("data-original");
+                    String remark = vod.select("div.module-item-note").text();
+                    Matcher matcher = regexVid.matcher(vod.select("a").attr("href"));
                     if (!matcher.find())
                         continue;
                     String id = matcher.group(1);
@@ -381,7 +384,7 @@ public class Voflix extends Spider {
         try {
             //定义播放用的headers
 
-            String url = siteUrl + "/vplay/" + id + ".html";
+            String url = siteUrl + "/play/" + id + ".html";
            // JSONObject headers = new JSONObject();
            // headers.put("origin", " https://www.jubaibai.me/");
            // headers.put("User-Agent", " Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36");
