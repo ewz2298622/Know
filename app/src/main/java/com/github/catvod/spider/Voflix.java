@@ -269,7 +269,7 @@ public class Voflix extends Spider {
             // 取基本数据
             String cover = doc.selectFirst("div.module-item-cover div.module-item-pic > img").attr("data-src");
             String title = doc.selectFirst("div.video-cover .module-item-pic > a").attr("alt");
-            String desc = Jsoup.parse(doc.selectFirst("meta[name=description]").attr("content")).text();
+            String desc = doc.selectFirst("div.video-info-item video-info-content vod_content > span").text().trim();
             String category = "", area = "", year = "", remark = "", director = "", actor = "";
             Elements span_text_muted = doc.select("div.video-info-main span.video-info-itemtitle");
             for (int i = 0; i < span_text_muted.size(); i++) {
