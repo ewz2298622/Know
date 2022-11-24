@@ -128,15 +128,15 @@ public class Voflix extends Spider {
             result.put("class", classes);
             try {
                 // 取首页推荐视频列表
-                Element homeList = doc.select("div.module-items div.module-item").get(0);
-                Elements list = homeList.select("div.module-item-cover div.module-item-pic a");
+                Element homeList = doc.select("div.module-items").get(0);
+                Elements list = homeList.select("div.module-item");
                 JSONArray videos = new JSONArray();
                 for (int i = 0; i < list.size(); i++) {
                     Element vod = list.get(i);
-                    String title = vod.select("a").attr("title");
-                    String cover = vod.select("img.lazy.lazyload").attr("data-src");
-                    String remark = vod.select("div.module-item-caption").text();
-                    Matcher matcher = regexVid.matcher(vod.select("a").attr("href"));
+                    String title = vod.select("div.module-item-titlebox a").attr("title");
+                    String cover = vod.select("img.lazy lazyloaded").attr("data-src");
+                    String remark = vod.select("div.module-item-text").text();
+                    Matcher matcher = regexVid.matcher(vod.select("div.module-item-titlebox a").attr("href"));
                     if (!matcher.find())
                         continue;
                     String id = matcher.group(1);
@@ -181,7 +181,7 @@ public class Voflix extends Spider {
                 }
             }
             // 获取分类数据的url
-            String url = siteUrl + "/vidshow/" + TextUtils.join("-", urlParams) + ".html";
+            String url = siteUrl + "/vodshow/" + TextUtils.join("-", urlParams) + ".html";
             String html = OkHttpUtil.string(url, getHeaders(url));
             Document doc = Jsoup.parse(html);
             JSONObject result = new JSONObject();
@@ -219,13 +219,13 @@ public class Voflix extends Spider {
             JSONArray videos = new JSONArray();
             if (!html.contains("没有找到您想要的结果哦")) {
                 // 取当前分类页的视频列表
-                Elements list = doc.select("div.module-items.module-poster-items-base a ");
+                Elements list = doc.select("div.module-items > div.module-item");
                 for (int i = 0; i < list.size(); i++) {
                     Element vod = list.get(i);
-                    String title = vod.select("a").attr("title");
-                    String cover = vod.select("img.lazy.lazyload").attr("data-original");
-                    String remark = vod.select("div.module-item-note").text();
-                    Matcher matcher = regexVid.matcher(vod.select("a").attr("href"));
+                    String title = vod.selectFirst("div.module-item-titlebox a").text();
+                    String cover = vod.selectFirst("div.module-item-pic > img").attr("data-src");
+                    String remark = vod.selectFirst("div.module-item-text").text();
+                    Matcher matcher = regexVid.matcher(vod.selectFirst("div.module-item-titlebox a").attr("href"));
                     if (!matcher.find())
                         continue;
                     String id = matcher.group(1);
