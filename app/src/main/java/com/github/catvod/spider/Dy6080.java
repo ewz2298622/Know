@@ -389,29 +389,29 @@ public class Dy6080 extends Spider {
                        Document doc = Jsoup.parse(OkHttpUtil.string(jxurl,headers));
                      //  System.out.println("zh" + doc);
                         Elements script = doc.select("body>script");
-                        for (int j = 0; j < script.size(); j++) {
-                          String content = script.get(j).html().trim();
-                          System.out.println("nr" + content);
-                          if (content.contains("var config =")) {
-                          Matcher matcher1 = urlt.matcher(content);
-                          if (!matcher1.find())
-                             continue;
-                          System.out.println("urt" + matcher1);
-                          Matcher matcher2 = time.matcher(content);
-                          if (!matcher2.find())
-                             continue;
-                            Matcher matcher3 = key.matcher(content);
-                            if (!matcher3.find())
-                               continue;
-                            System.out.println("urt1" + matcher3);
-                            String video_url = matcher1.group(1);
-                            System.out.println("vr" +video_url);
-                            String key = matcher3.group(1);
-                            System.out.println("k" + key);                          
-                        //    String video_sign= "F4penExTGogdt6U8" ;
-                            String video_tm = String.valueOf(System.currentTimeMillis()/ 1000);
-                            HashMap hashMap = new HashMap();
-                      //      hashMap.put("token", video_token);
+                        String content = script.get(j).html().trim();
+                                System.out.println("nr" + content);
+                                if (content.contains("var config =")) {
+                                    Matcher matcher1 = urlt.matcher(content);
+                                    if (!matcher1.find())
+                                        continue;
+                                    System.out.println("urt" + matcher1);
+                                  Matcher matcher2 = time.matcher(content);
+                                  if (!matcher2.find())
+                                       continue;
+                                    Matcher matcher3 = key.matcher(content);
+                                    if (!matcher3.find())
+                                        continue;
+                                    System.out.println("urt1" + matcher3);
+                                    String video_url = matcher1.group(1);
+                                    System.out.println("vr" +video_url);
+                                    String key = matcher3.group(1);
+                                    System.out.println("k" + key);
+                               //     String video_sign = "F4penExTGogdt6U8";
+                                    String video_tm = matcher2.group(1);
+                                    System.out.println("t" + video_tm);
+                                    HashMap hashMap = new HashMap();
+                               //     hashMap.put("token", video_token);
                             hashMap.put("time", video_tm);
                             hashMap.put("url", video_url);
                             hashMap.put("key", video_key);
