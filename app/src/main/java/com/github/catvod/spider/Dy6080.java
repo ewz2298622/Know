@@ -349,7 +349,9 @@ public class Dy6080 extends Spider {
      */
      private final Pattern urlt = Pattern.compile("\"url\": *\"([^\"]*)\",");
     private final Pattern token = Pattern.compile("\"token\": *\"([^\"]*)\"");
-    private final Pattern vkey = Pattern.compile("\"vkey\": *\"([^\"]*)\",");
+    private final Pattern key = Pattern.compile("\"key\": *\"([^\"]*)\",");
+//    private final Pattern vkey = Pattern.compile("\"vkey\": *\"([^\"]*)\",");
+    private final Pattern time = Pattern.compile("\"time\": *\"([^\"]*)\",");
 //    private final Pattern tm = Pattern.compile("\"tm\": *\"([^\"]*)\",");
     @Override
     public String playerContent(String flag, String id, List<String> vipFlags) {
@@ -404,13 +406,13 @@ public class Dy6080 extends Spider {
                             String video_url = matcher1.group(1);
                             String video_token = matcher2.group(1);
                             String video_key = matcher3.group(1);                          
-                            String video_sign= "F4penExTGogdt6U8" ;
+                    //        String video_sign= "F4penExTGogdt6U8" ;
                             String video_tm = String.valueOf(System.currentTimeMillis()/ 1000);
                             HashMap hashMap = new HashMap();
                             hashMap.put("token", video_token);
-                            hashMap.put("tm", video_tm);
+                            hashMap.put("time", video_tm);
                             hashMap.put("url", video_url);
-                            hashMap.put("vkey", video_key);
+                            hashMap.put("key", video_key);
                              hashMap.put("sign", video_sign);
                             OkHttpUtil.get(OkHttpUtil.defaultClient(), "https://play.shcpin.com/xplay/555tZ4pvzHE3BpiO838.php", hashMap, new OKCallBack.OKCallBackString() {
                                 @Override
