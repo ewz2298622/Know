@@ -1,4 +1,4 @@
-package com.github.catvod.spider;
+    package com.github.catvod.spider;
 
 import android.content.Context;
 import android.text.TextUtils;
@@ -301,8 +301,9 @@ public class Voflix extends Spider {
                 }
             });
             // 取播放列表数据
-            Elements sources = doc.select("div.module-tab-content div span");
-            Elements sourceList = doc.select("div.module-player-list");
+            Elements sources = doc.select("div[id='y-playList'] span");
+
+            Elements sourceList = doc.select("div.module-play-list");
 
             for (int i = 0; i < sources.size(); i++) {
                 Element source = sources.get(i);
@@ -310,7 +311,7 @@ public class Voflix extends Spider {
                 boolean found = false;
                 for (Iterator<String> it = playerConfig.keys(); it.hasNext(); ) {
                     String flag = it.next();
-                    if (playerConfig.getJSONObject(flag).getString("sh").equals(sourceName)) {
+                    if (playerConfig.getJSONObject(flag).getString("show").equals(sourceName)) {
                         sourceName = flag;
                         found = true;
                         break;
@@ -319,24 +320,23 @@ public class Voflix extends Spider {
                 if (!found)
                     continue;
                 String playList = "";
-                Elements playListA = sourceList.get(i).select("div a");
+                Elements playListA = sourceList.get(i).select("a.module-play-list-link ");
                 List<String> vodItems = new ArrayList<>();
 
                 for (int j = 0; j < playListA.size(); j++) {
                     Element vod = playListA.get(j);
                     Matcher matcher = regexPlay.matcher(vod.attr("href"));
+
                     if (!matcher.find())
                         continue;
                     String playURL = matcher.group(1) + "-" + matcher.group(2) + "-" + matcher.group(3);
-                    String vodName = vod.select("span").text();
-                    vodItems.add(vodName + "$" + playURL);
+                    vodItems.add(vod.text() + "$" + playURL);
                 }
                 if (vodItems.size() > 0)
                     playList = TextUtils.join("#", vodItems);
 
                 if (playList.length() == 0)
                     continue;
-
                 vod_play.put(sourceName, playList);
             }
 
