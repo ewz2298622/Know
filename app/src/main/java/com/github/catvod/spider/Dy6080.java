@@ -369,7 +369,7 @@ public class Dy6080 extends Spider {
             JSONObject result = new JSONObject();
             for (int i = 0; i < allScript.size(); i++) {
                 String scContent = allScript.get(i).html().trim();
-                if (scContent.startsWith("var player_aaaa")) { // 取直链
+                if (scContent.startsWith("var player_")) { // 取直链
                     int start = scContent.indexOf('{');
                     int end = scContent.lastIndexOf('}') + 1;
                     String json = scContent.substring(start, end);
@@ -404,15 +404,15 @@ public class Dy6080 extends Spider {
                             String video_url = matcher1.group(1);
                             String video_token = matcher2.group(1);
                             String video_key = matcher3.group(1);                          
-                     //       String video_sign= "F4penExTGogdt6U8" ;
+                    //        String video_sign= "F4penExTGogdt6U8" ;
                             String video_tm = String.valueOf(System.currentTimeMillis()/ 1000);
                             HashMap hashMap = new HashMap();
-                            hashMap.put("token", video_token);
-                            hashMap.put("time", video_time);
+                    //        hashMap.put("token", video_token);
+                            hashMap.put("tm", video_tm);
                             hashMap.put("url", video_url);
-                            hashMap.put("key", video_key);
-                     //        hashMap.put("sign", video_sign);
-                            OkHttpUtil.get(OkHttpUtil.defaultClient(), "https://jx1.bw66.xyz/m3u8/API.php", hashMap, new OKCallBack.OKCallBackString() {
+                            hashMap.put("vkey", video_key);
+                    //        hashMap.put("sign", video_sign);
+                            OkHttpUtil.get(OkHttpUtil.defaultClient(), "https://play.shcpin.com/xplay/555tZ4pvzHE3BpiO838.php", hashMap, new OKCallBack.OKCallBackString() {
                                 @Override
                                 protected void onFailure(Call call, Exception exc) {
                                 }
