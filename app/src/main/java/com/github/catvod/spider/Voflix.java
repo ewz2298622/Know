@@ -33,8 +33,8 @@ import okhttp3.Call;
 import okhttp3.Headers;
 
 public class Voflix extends Spider {
-    private static final String siteUrl = "https://www.6080dy1.com";
-    private static final String siteHost = "www.6080dy1.com";
+    private static final String siteUrl = "https://www.voflix.com";
+    private static final String siteHost = "www.voflix.com";
 
     /**
      * 播放源配置
@@ -44,10 +44,10 @@ public class Voflix extends Spider {
      * 筛选配置
      */
     private JSONObject filterConfig;
-    private Pattern regexCategory = Pattern.compile("/vodtype/(\\d+).html");
-    private Pattern regexVid = Pattern.compile("/video/(\\d+).html");
-    private Pattern regexPlay = Pattern.compile("/vplay/(\\d+)-(\\d+)-(\\d+).html");
-    private Pattern regexPage = Pattern.compile("/vodshow/(\\S+).html");
+    private Pattern regexCategory = Pattern.compile("/type/(\\d+).html");
+    private Pattern regexVid = Pattern.compile("/detail/(\\d+).html");
+    private Pattern regexPlay = Pattern.compile("/play/(\\d+)-(\\d+)-(\\d+).html");
+    private Pattern regexPage = Pattern.compile("/show/(\\S+).html");
 
     @Override
     public void init(Context context) {
@@ -101,14 +101,17 @@ public class Voflix extends Spider {
         try {
             Document doc = Jsoup.parse(OkHttpUtil.string(siteUrl, getHeaders(siteUrl)));
             // 分类节点
-            Elements elements = doc.select("ul.nav-menu-items>li.nav-menu-item>a");
+            Elements elements = doc.select("ul.navbar-items>li.navbar-item>a");
             JSONArray classes = new JSONArray();
             for (Element ele : elements) {
                 String name = ele.text();
                 boolean show = name.equals("电影") ||
-                        name.equals("电视剧") ||
+                        name.equals("剧集") ||
                         name.equals("动漫") ||
-                        name.equals("综艺");
+                        name.equals("综艺") ||
+                        name.equals("国产剧") ||
+                        name.equals("日韩剧") ||
+                        name.equals("欧美剧");
                 if (show) {
                     Matcher mather = regexCategory.matcher(ele.attr("href"));
                     if (!mather.find())
@@ -128,15 +131,15 @@ public class Voflix extends Spider {
             result.put("class", classes);
             try {
                 // 取首页推荐视频列表
-                Element homeList = doc.select("div.module-items").get(0);
-                Elements list = homeList.select("div.module-item");
+                Element homeList = doc.select("div.module-main.scroll-box").get(0);
+                Elements list = homeList.select("div.module-items.module-poster-items-small.scroll-content a");
                 JSONArray videos = new JSONArray();
                 for (int i = 0; i < list.size(); i++) {
                     Element vod = list.get(i);
-                    String title = vod.select("div.module-item-titlebox a").attr("title");
-                    String cover = vod.select("img.lazy lazyloaded").attr("data-src");
-                    String remark = vod.select("div.module-item-text").text();
-                    Matcher matcher = regexVid.matcher(vod.select("div.module-item-titlebox a").attr("href"));
+                    String title = vod.select("a").attr("title");
+                    String cover = vod.select("img.lazy.lazyload").attr("data-original");
+                    String remark = vod.select("div.module-item-note").text();
+                    Matcher matcher = regexVid.matcher(vod.select("a").attr("href"));
                     if (!matcher.find())
                         continue;
                     String id = matcher.group(1);
@@ -181,7 +184,7 @@ public class Voflix extends Spider {
                 }
             }
             // 获取分类数据的url
-            String url = siteUrl + "/vodshow/" + TextUtils.join("-", urlParams) + ".html";
+            String url = siteUrl + "/show/" + TextUtils.join("-", urlParams) + ".html";
             String html = OkHttpUtil.string(url, getHeaders(url));
             Document doc = Jsoup.parse(html);
             JSONObject result = new JSONObject();
@@ -219,13 +222,13 @@ public class Voflix extends Spider {
             JSONArray videos = new JSONArray();
             if (!html.contains("没有找到您想要的结果哦")) {
                 // 取当前分类页的视频列表
-                Elements list = doc.select("div.module-items > div.module-item");
+                Elements list = doc.select("div.module-items.module-poster-items-base a ");
                 for (int i = 0; i < list.size(); i++) {
                     Element vod = list.get(i);
-                    String title = vod.selectFirst("div.module-item-titlebox a").text();
-                    String cover = vod.selectFirst("div.module-item-pic > img").attr("data-src");
-                    String remark = vod.selectFirst("div.module-item-text").text();
-                    Matcher matcher = regexVid.matcher(vod.selectFirst("div.module-item-titlebox a").attr("href"));
+                    String title = vod.select("a").attr("title");
+                    String cover = vod.select("img.lazy.lazyload").attr("data-original");
+                    String remark = vod.select("div.module-item-note").text();
+                    Matcher matcher = regexVid.matcher(vod.select("a").attr("href"));
                     if (!matcher.find())
                         continue;
                     String id = matcher.group(1);
@@ -260,88 +263,43 @@ public class Voflix extends Spider {
     public String detailContent(List<String> ids) {
         try {
             // 视频详情url
-            String url = siteUrl + "/video/" + ids.get(0) + ".html";
-            //System.out.println(url);
+            String url = siteUrl + "/detail/" + ids.get(0) + ".html";
             Document doc = Jsoup.parse(OkHttpUtil.string(url, getHeaders(url)));
             JSONObject result = new JSONObject();
             JSONObject vodList = new JSONObject();
 
             // 取基本数据
-            String cover = doc.select("div.module-item-cover div.module-item-pic > img").attr("data-src");
-            String title = doc.select("div.video-cover .module-item-pic > a").attr("alt");
-            String desc = doc.selectFirst("div.video-info-item video-info-content vod_content > span").text();
-            String category = "", area = "", year = "", remark = "", director = "", actor = "";
-            Elements span_text_muted = doc.select("div.video-info-main span.video-info-itemtitle");
-            for (int i = 0; i < span_text_muted.size(); i++) {
-                Element text = span_text_muted.get(i);
-                String info = text.text();
-                if (info.equals("分类：")) {
-                    category = text.nextElementSibling().text();
-                } else if (info.equals("上映：")) {
-                    year = text.nextElementSibling().text();
-                } else if (info.equals("地区：")) {
-                    area = text.nextElementSibling().text();
-                } else if (info.equals("更新：")) {
-                    remark = text.nextElementSibling().text();
-                } else if (info.equals("导演：")) {
-                    List<String> directors = new ArrayList<>();
-                    Elements aa = text.parent().select("a");
-                    for (int j = 0; j < aa.size(); j++) {
-                        directors.add(aa.get(j).text());
-                    }
-                    director = TextUtils.join(",", directors);
-                } else if (info.equals("主演：")) {
-                    List<String> actors = new ArrayList<>();
-                    Elements aa = text.parent().select("a");
-                    for (int j = 0; j < aa.size(); j++) {
-                        actors.add(aa.get(j).text());
-                    }
-                    actor = TextUtils.join(",", actors);
-                }
-            }
-
+            String cover = doc.select(" div.module-item-pic  img").attr("data-original");
+            String title = doc.select(" div.module-info-heading  h1").text();
+            
+    
+            Elements span_text_muted = doc.select("div.module-info-items div.module-info-item  span");
+           
             vodList.put("vod_id", ids.get(0));
             vodList.put("vod_name", title);
             vodList.put("vod_pic", cover);
-            vodList.put("type_name", category);
-            vodList.put("vod_year", year);
-            vodList.put("vod_area", area);
-            vodList.put("vod_remarks", remark);
-            vodList.put("vod_actor", actor);
-            vodList.put("vod_director", director);
+         //   vodList.put("type_name", category);
+         //   vodList.put("vod_year", year);
+         //   vodList.put("vod_area", area);
+         //   vodList.put("vod_remarks", remark);
+         //   vodList.put("vod_actor", actor);
+         //   vodList.put("vod_director", director);
             vodList.put("vod_content", desc);
-            //System.out.println(vodList.toString());
-            Map<String, String> vod_play = new TreeMap<>(new Comparator<String>() {
-                @Override
-                public int compare(String o1, String o2) {
-                    try {
-                        int sort1 = playerConfig.getJSONObject(o1).getInt("or");
-                        int sort2 = playerConfig.getJSONObject(o2).getInt("or");
 
-                        if (sort1 == sort2) {
-                            return 1;
-                        }
-                        return sort1 - sort2 > 0 ? 1 : -1;
-                    } catch (JSONException e) {
-                        SpiderDebug.log(e);
-                    }
-                    return 1;
-                }
-            });
+            Map<String, String> vod_play = new LinkedHashMap<>();
 
             // 取播放列表数据
-            Elements sources = doc.select("div.module-tab-content").get(0).select("div > span");
-            //System.out.println(sources.size());
-            Elements sourceList = doc.select("div.module-player-list");
-            //System.out.println(sourceList.size());
+            Elements sources = doc.select("div[id='y-playList'] span");
+
+            Elements sourceList = doc.select("div.module-play-list");
+
             for (int i = 0; i < sources.size(); i++) {
                 Element source = sources.get(i);
-                //System.out.println(sources.text().split("：")[0].split("』")[1]);
                 String sourceName = source.text();
                 boolean found = false;
                 for (Iterator<String> it = playerConfig.keys(); it.hasNext(); ) {
                     String flag = it.next();
-                    if (playerConfig.getJSONObject(flag).getString("sh").equals(sourceName)) {
+                    if (playerConfig.getJSONObject(flag).getString("show").equals(sourceName)) {
                         sourceName = flag;
                         found = true;
                         break;
@@ -350,13 +308,13 @@ public class Voflix extends Spider {
                 if (!found)
                     continue;
                 String playList = "";
-                Elements playListA = sourceList.get(i).select(".scroll-content > a");
-                //System.out.println(playListA.size());
+                Elements playListA = sourceList.get(i).select("a.module-play-list-link ");
                 List<String> vodItems = new ArrayList<>();
 
                 for (int j = 0; j < playListA.size(); j++) {
                     Element vod = playListA.get(j);
                     Matcher matcher = regexPlay.matcher(vod.attr("href"));
+
                     if (!matcher.find())
                         continue;
                     String playURL = matcher.group(1) + "-" + matcher.group(2) + "-" + matcher.group(3);
@@ -367,7 +325,6 @@ public class Voflix extends Spider {
 
                 if (playList.length() == 0)
                     continue;
-
                 vod_play.put(sourceName, playList);
             }
 
@@ -404,7 +361,7 @@ public class Voflix extends Spider {
         try {
             //定义播放用的headers
 
-            String url = siteUrl + "/vplay/" + id + ".html";
+            String url = siteUrl + "/play/" + id + ".html";
            // JSONObject headers = new JSONObject();
            // headers.put("origin", " https://www.jubaibai.me/");
            // headers.put("User-Agent", " Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36");
