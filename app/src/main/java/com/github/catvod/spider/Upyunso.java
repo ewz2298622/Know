@@ -26,7 +26,7 @@ import org.jsoup.select.Elements;
 public class Upyunso extends Spider {
     private PushAgent pushAgent;
     private static String siteUrl = "https://www.upyunso.com/";
-    private static String apiUrl = "https://api.upyunso.com/";
+    private static String apiUrl = "https://api.upyunso2.com/";
     private static Pattern aliyun = Pattern.compile("(https:\\/\\/www.aliyundrive.com\\/s\\/[^\\\"]+)");
 
     @Override
