@@ -381,9 +381,9 @@ public class Dy6080 extends Spider {
                         String videoUrl = player.getString("url");
                         String show = pCfg.getString("sh");
                         System.out.println("yx" + show);
-                        if (show.contains("首选蓝光")) {
-                            String jxurl = "https://api.playaaaa.com/bt/?url=" + videoUrl;
-                            System.out.println("dd" + jxurl);
+                        if (show.contains("蓝光专线①")) {
+                            String jxurl = "https://jx1.bw66.xyz/m3u8/?url=" + videoUrl;
+                            System.out.println("jx" + jxurl);
                             HashMap<String, String> headers = new HashMap<>();
                             headers.put("referer", url);
                             Document doc1 = Jsoup.parse(OkHttpUtil.string(jxurl,Headers()));
