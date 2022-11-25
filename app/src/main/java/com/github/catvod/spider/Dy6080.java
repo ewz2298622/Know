@@ -264,16 +264,16 @@ public class Dy6080 extends Spider {
     public String detailContent(List<String> ids) {
         try {
             // 视频详情url
-            String url = siteUrl + "/vplay/" + ids.get(0) + ".html";
+            String url = siteUrl + "/yingpiandetail/" + ids.get(0) + ".html";
             //System.out.println(url);
             Document doc = Jsoup.parse(OkHttpUtil.string(url, getHeaders(url)));
             JSONObject result = new JSONObject();
             JSONObject vodList = new JSONObject();
 
             // 取基本数据
-            String cover = doc.selectFirst("div.module-item-pic > img").attr("data-src");
-            String title = doc.selectFirst("div.video-info-header h1").text();
-            String desc = Jsoup.parse(doc.selectFirst("div.video-info-content").text();
+            String cover = doc.selectFirst("div.video-cover .module-item-pic > img").attr("data-src");
+            String title = doc.selectFirst("div.video-cover .module-item-pic > a").attr("alt");
+            String desc = Jsoup.parse(doc.selectFirst("meta[name=description]").attr("content")).text();
             String category = "", area = "", year = "", remark = "", director = "", actor = "";
             Elements span_text_muted = doc.select("div.video-info-main span.video-info-itemtitle");
             for (int i = 0; i < span_text_muted.size(); i++) {
