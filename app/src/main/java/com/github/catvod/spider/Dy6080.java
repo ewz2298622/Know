@@ -273,7 +273,7 @@ public class Dy6080 extends Spider {
             // 取基本数据
             String cover = doc.selectFirst("div.video-cover .module-item-pic > img").attr("data-src");
             String title = doc.selectFirst("div.video-info-header > h1").text();
-            String desc = Jsoup.parse(doc.selectFirst("div.video-info-content").text();
+            desc = doc.select("div.video-info-content").text();
             String category = "", area = "", year = "", remark = "", director = "", actor = "";
             Elements span_text_muted = doc.select("div.video-info-main span.video-info-itemtitle");
             for (int i = 0; i < span_text_muted.size(); i++) {
