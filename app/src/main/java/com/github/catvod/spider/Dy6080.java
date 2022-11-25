@@ -271,8 +271,8 @@ public class Dy6080 extends Spider {
             JSONObject vodList = new JSONObject();
 
             // 取基本数据
-            String cover = doc.selectFirst("div.video-cover .module-item-pic > img").attr("data-src");
-            String title = doc.selectFirst("div.video-cover .module-item-pic > img").attr("alt");
+            String cover = doc.selectFirst("div.module-item-pic > img").attr("data-src");
+            String title = doc.selectFirst("div.video-info-header h1").text();
             String desc = Jsoup.parse(doc.selectFirst("div.video-info-content").text();
             String category = "", area = "", year = "", remark = "", director = "", actor = "";
             Elements span_text_muted = doc.select("div.video-info-main span.video-info-itemtitle");
