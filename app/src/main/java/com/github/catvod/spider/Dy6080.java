@@ -365,7 +365,7 @@ public class Dy6080 extends Spider {
 
 
             // 播放页 url
-            String url = siteUrl + "/vodplay/" + id + ".html";
+            String url = siteUrl + "/vplay/" + id + ".html";
             Document doc = Jsoup.parse(OkHttpUtil.string(url, getHeaders(url)));
             Elements allScript = doc.select("script");
             JSONObject result = new JSONObject();
