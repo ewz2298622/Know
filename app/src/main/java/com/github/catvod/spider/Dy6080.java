@@ -269,10 +269,8 @@ public class Dy6080 extends Spider {
             JSONObject result = new JSONObject();
             JSONObject vodList = new JSONObject();
 
-            // 取基本数据
-            String cover = doc.selectFirst("div.module-item-cover div.module-item-pic img").attr("data-src");
-
-            String title = doc.selectFirst("div.video-info-header > h1").text();
+            String cover = FixUrl(pic, doc.selectFirst("div.module-item-pic img").attr("data-src"));
+            String title = doc.selectFirst("div.video-info-header h1").text();
 
             String category = "", area = "", year = "", director = "", actor = "", remark = "", desc = "";
 
@@ -281,7 +279,7 @@ public class Dy6080 extends Spider {
             area = doc.select("div.module-info-tag-link a").get(1).text();
             desc = doc.select("div.video-info-content").text();
 
-            Elements span_text_muted = doc.select("div.module-info-item span");
+            Elements span_text_muted = doc.select("div.video-info-main span.video-info-itemtitle");
             for (int i = 0; i < span_text_muted.size() - 2; i++) {
                 Element Spantext = span_text_muted.get(i);
                 String info = Spantext.text();
