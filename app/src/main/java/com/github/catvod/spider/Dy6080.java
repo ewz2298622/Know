@@ -273,32 +273,27 @@ public class Dy6080 extends Spider {
             String title = doc.selectFirst("div.video-info-header > h1.page-title").text();
             String desc = doc.select("div.video-info-content span").text();
             String category = "", area = "", year = "", remark = "", director = "", actor = "";
-            Elements span_text_muted = doc.select("div.video-info-main span.video-info-itemtitle");
+            category = doc.select("div.video-info div.video-info-header div.scroll-box div.video-info-aux scroll-content div.tag-link").get(2).text();
+            area = doc.select("div.video-info div.video-info-header div.scroll-box div.video-info-aux scroll-content div.tag-link").get(1).text();
+            year = doc.select("div.video-info div.video-info-header div.scroll-box div.video-info-aux scroll-content div.tag-link").get(0).text();
+
+            
+            Elements span_text_muted = doc.select("div.video-info-items span.video-info-itemtitle");
             for (int i = 0; i < span_text_muted.size(); i++) {
                 Element text = span_text_muted.get(i);
-                String info = text.text();
-                if (info.equals("分类：")) {
-                    category = text.nextElementSibling().text();
-                } else if (info.equals("上映：")) {
-                    year = text.nextElementSibling().text();
-                } else if (info.equals("地区：")) {
-                    area = text.nextElementSibling().text();
-                } else if (info.equals("更新：")) {
-                    remark = text.nextElementSibling().text();
-                } else if (info.equals("导演：")) {
-                    List<String> directors = new ArrayList<>();
-                    Elements aa = text.parent().select("a");
-                    for (int j = 0; j < aa.size(); j++) {
-                        directors.add(aa.get(j).text());
+                String info = text.select("span").text();
+                if (info.contains("导演")) {
+                    try {
+                        director = text.select("div > a").text();
+                    } catch (Exception e) {
+                        director = "";
                     }
-                    director = TextUtils.join(",", directors);
-                } else if (info.equals("主演：")) {
-                    List<String> actors = new ArrayList<>();
-                    Elements aa = text.parent().select("a");
-                    for (int j = 0; j < aa.size(); j++) {
-                        actors.add(aa.get(j).text());
+                } else if (info.contains("主演")) {
+                    try {
+                        actor = text.select("div > a").text();
+                    } catch (Exception e) {
+                        actor = "";
                     }
-                    actor = TextUtils.join(",", actors);
                 }
             }
 
@@ -308,11 +303,11 @@ public class Dy6080 extends Spider {
             vodList.put("type_name", category);
             vodList.put("vod_year", year);
             vodList.put("vod_area", area);
-            vodList.put("vod_remarks", remark);
             vodList.put("vod_actor", actor);
             vodList.put("vod_director", director);
             vodList.put("vod_content", desc);
-            Map<String, String> vod_play = new TreeMap<>(new Comparator<String>() {
+            Map<String, String> vod_play = new LinkedHashMap<>();
+          /*  Map<String, String> vod_play = new TreeMap<>(new Comparator<String>() {
                 @Override
                 public int compare(String o1, String o2) {
                     try {
@@ -328,7 +323,8 @@ public class Dy6080 extends Spider {
                     }
                     return 1;
                 }
-            });
+            });*/
+
             // 取播放列表数据
             Elements sources = doc.select("div.module-tab-content div span");
             Elements sourceList = doc.select("div.module-player-list");
