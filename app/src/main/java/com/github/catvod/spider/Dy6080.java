@@ -273,9 +273,6 @@ public class Dy6080 extends Spider {
             String title = doc.selectFirst("div.video-info-header > h1.page-title").text();
             String desc = doc.select("div.video-info-content span").text();
             String category = "", area = "", year = "", remark = "", director = "", actor = "";
-            category = doc.select("div.video-info div.video-info-header div.scroll-box").get(2).text();
-            area = doc.select("div.video-info div.video-info-header div.scroll-box").get(1).text();
-            year = doc.select("div.video-info div.video-info-header div.scroll-box").get(0).text();
             Elements span_text_muted = doc.select("div.video-info-main span.video-info-itemtitle");
             for (int i = 0; i < span_text_muted.size(); i++) {
                 Element text = span_text_muted.get(i);
