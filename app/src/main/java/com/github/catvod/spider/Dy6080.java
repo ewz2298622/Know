@@ -270,39 +270,38 @@ public class Dy6080 extends Spider {
             JSONObject vodList = new JSONObject();
 
             // 取基本数据
-            String cover = doc.selectFirst("div.module-item-cover div.module-item-pic img").attr("data-src");
-
-            String title = doc.selectFirst("div.module-info-heading h1").text();
-
-            String category = "", area = "", year = "", director = "", actor = "", remark = "", desc = "";
-
-            category = doc.select("div.module-info-tag-link").get(2).text();
-            year = doc.select("div.module-info-tag-link a").get(0).text();
-            area = doc.select("div.module-info-tag-link a").get(1).text();
-            desc = doc.select("div.video-info-content").text();
-
-            Elements span_text_muted = doc.select("div.module-info-item span");
-            for (int i = 0; i < span_text_muted.size() - 2; i++) {
-                Element Spantext = span_text_muted.get(i);
-                String info = Spantext.text();
-                if (info.contains("更新：")) {
-                    try {
-                        remark = Spantext.parent().select("div").text();
-                    } catch (Exception e) {
-                        remark = "";
+            String cover = doc.selectFirst("div.module-item-pic img").attr("data-original");
+            String title = doc.selectFirst("div.video-info-header h1").text();
+            String category = "", area = "", year = "", remark = "", director = "", actor = "", desc = "";
+    
+            Elements span_text_muted = doc.select("div.video-info-main div.video-info-items span");
+           year = doc.selectFirst("div.module-info-tag > div > a").text();
+            desc = doc.selectFirst("div.video-info-content").text().trim();
+            for (int i = 0; i < span_text_muted.size(); i++) {
+                Element text = span_text_muted.get(i);
+                String info = text.text();
+                if (info.equals("分类：")) {
+                    category = text.nextElementSibling().text();
+                } else if (info.equals("上映：")) {
+                    year = text.nextElementSibling().text();
+                } else if (info.equals("地区：")) {
+                    area = text.nextElementSibling().text();
+                } else if (info.equals("更新：")) {
+                    remark = text.nextElementSibling().text();
+                } else if (info.equals("导演：")) {
+                    List<String> directors = new ArrayList<>();
+                    Elements aa = text.parent().select("a");
+                    for (int j = 0; j < aa.size(); j++) {
+                        directors.add(aa.get(j).text());
                     }
-                } else if (info.contains("导演：")) {
-                    try {
-                        director = Spantext.parent().select("div a").text();
-                    } catch (Exception e) {
-                        director = "";
+                    director = TextUtils.join(",", directors);
+                } else if (info.equals("主演：")) {
+                    List<String> actors = new ArrayList<>();
+                    Elements aa = text.parent().select("a");
+                    for (int j = 0; j < aa.size(); j++) {
+                        actors.add(aa.get(j).text());
                     }
-                } else if (info.contains("主演：")) {
-                    try {
-                        actor = Spantext.parent().select("div a").text();
-                    } catch (Exception e) {
-                        actor = "";
-                    }
+                    actor = TextUtils.join(",", actors);
                 }
             }
 
@@ -316,7 +315,7 @@ public class Dy6080 extends Spider {
             vodList.put("vod_actor", actor);
             vodList.put("vod_director", director);
             vodList.put("vod_content", desc);
-
+            //System.out.println(vodList.toString());
             Map<String, String> vod_play = new TreeMap<>(new Comparator<String>() {
                 @Override
                 public int compare(String o1, String o2) {
