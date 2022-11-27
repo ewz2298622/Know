@@ -100,7 +100,6 @@ public class Xifanys extends Spider {
                     JSONObject jsonObject = new JSONObject();
                     jsonObject.put("type_id", id);
                     jsonObject.put("type_name", name);
-                    //System.out.println(id+"："+name);
                     classes.put(jsonObject);
                 }
             }
@@ -441,11 +440,8 @@ public class Xifanys extends Spider {
     @Override
     public String searchContent(String key, boolean quick) {
         try {
-            if (quick)
-                return "";
             long currentTime = System.currentTimeMillis();
-            String url = siteUrl + "/index.php/ajax/suggest?mid=1&wd=" + URLEncoder.encode(key) + "&limit=10&timestamp=" + currentTime;
-            //Document doc = Jsoup.parse(srr.content);
+            String url = siteUrl + "/index.php/ajax/suggest?mid=1&wd=" + URLEncoder.encode(key) + "&limit=35&timestamp=" + currentTime;
             JSONObject searchResult = new JSONObject(OkHttpUtil.string(url, getHeaders(url)));
             JSONObject result = new JSONObject();
             JSONArray videos = new JSONArray();
