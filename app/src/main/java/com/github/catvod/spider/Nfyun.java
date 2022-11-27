@@ -273,67 +273,21 @@ public class Nfyun extends Spider {
             Document doc = Jsoup.parse(OkHttpUtil.string(url, getHeaders(url)));
             JSONObject result = new JSONObject();
             JSONObject vodList = new JSONObject();
+
             // 取基本数据
             String cover = doc.selectFirst("div.module-item-pic > img").attr("data-src");
-            String title = doc.selectFirst("div.video-info-header > h1.page-title").text();
-            String desc = doc.select("div.video-info-content span").text();
-            String category = "", area = "", year = "", remark = "", director = "", actor = "";
-            Elements span_text_muted = doc.select("div.video-info-main span.video-info-itemtitle");
-            for (int i = 0; i < span_text_muted.size(); i++) {
-                Element text = span_text_muted.get(i);
-                String info = text.text();
-                if (info.equals("分类：")) {
-                    category = text.nextElementSibling().text();
-                } else if (info.equals("上映：")) {
-                    year = text.nextElementSibling().text();
-                } else if (info.equals("地区：")) {
-                    area = text.nextElementSibling().text();
-                } else if (info.equals("更新：")) {
-                    remark = text.nextElementSibling().text();
-                } else if (info.equals("导演：")) {
-                    List<String> directors = new ArrayList<>();
-                    Elements aa = text.parent().select("a");
-                    for (int j = 0; j < aa.size(); j++) {
-                        directors.add(aa.get(j).text());
-                    }
-                    director = TextUtils.join(",", directors);
-                } else if (info.equals("主演：")) {
-                    List<String> actors = new ArrayList<>();
-                    Elements aa = text.parent().select("a");
-                    for (int j = 0; j < aa.size(); j++) {
-                        actors.add(aa.get(j).text());
-                    }
-                    actor = TextUtils.join(",", actors);
-                }
-            }
 
+            String title = doc.selectFirst("div.video-info-header > h1.page-title").text();
+
+            String desc = doc.selectFirst("div.video-info-content span").text();
+            System.out.println("co" + desc);
             vodList.put("vod_id", ids.get(0));
             vodList.put("vod_name", title);
             vodList.put("vod_pic", cover);
-            vodList.put("type_name", category);
-            vodList.put("vod_year", year);
-            vodList.put("vod_area", area);
-            vodList.put("vod_remarks", remark);
-            vodList.put("vod_actor", actor);
-            vodList.put("vod_director", director);
             vodList.put("vod_content", desc);
-            Map<String, String> vod_play = new TreeMap<>(new Comparator<String>() {
-                @Override
-                public int compare(String o1, String o2) {
-                    try {
-                        int sort1 = playerConfig.getJSONObject(o1).getInt("or");
-                        int sort2 = playerConfig.getJSONObject(o2).getInt("or");
 
-                        if (sort1 == sort2) {
-                            return 1;
-                        }
-                        return sort1 - sort2 > 0 ? 1 : -1;
-                    } catch (JSONException e) {
-                        SpiderDebug.log(e);
-                    }
-                    return 1;
-                }
-            });
+            Map<String, String> vod_play = new LinkedHashMap<>();
+
             // 取播放列表数据
             Elements sources = doc.select("div.module-tab-content div span");
             Elements sourceList = doc.select("div.module-player-list");
