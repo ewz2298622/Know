@@ -27,8 +27,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Nfyun extends Spider {
-    private static final String siteUrl = "https://yanaifei.cn";
-    private static final String siteHost = "yanaifei.cn";
+    private static final String siteUrl = "https://www.6080dy1.com";
+    private static final String siteHost = "www.6080dy1.com";
     private static Pattern pic = Pattern.compile("(?<=url=).*");
 
     /**
@@ -41,7 +41,7 @@ public class Nfyun extends Spider {
     private JSONObject filterConfig;
     private Pattern regexCategory = Pattern.compile("/vod/type/(\\d+).html");
     private Pattern regexVid = Pattern.compile("/vod/detail/(\\d+).html");
-    private Pattern regexPlay = Pattern.compile("/vod/play/(\\d+)-(\\d+)-(\\d+).html");
+    private Pattern regexPlay = Pattern.compile("/vplay/(\\d+)-(\\d+)-(\\d+).html");
     private Pattern regexPage = Pattern.compile("/vod/show/(\\S+).html");
 
     protected String ext = null;
@@ -106,64 +106,63 @@ public class Nfyun extends Spider {
                 }
                 Document doc = Jsoup.parse(OkHttpUtil.string(url, getHeaders(url))); */
                 // 分类节点
-                public String homeContent(boolean filter) {
-        try {
-            Document doc = Jsoup.parse(OkHttpUtil.string(siteUrl, getHeaders(siteUrl)));
-            // 分类节点
-            Elements elements = doc.select("ul.nav-menu-items>li.nav-menu-item>a");
-            JSONArray classes = new JSONArray();
-            for (Element ele : elements) {
-                String name = ele.text();
-                boolean show = name.equals("电影") ||
-                        name.equals("电视剧") ||
-                        name.equals("动漫") ||
-                        name.equals("综艺");
-                if (show) {
-                    Matcher mather = regexCategory.matcher(ele.attr("href"));
-                    if (!mather.find())
-                        continue;
-                    // 把分类的id和名称取出来加到列表里
-                    String id = mather.group(1).trim();
-                    JSONObject jsonObject = new JSONObject();
-                    jsonObject.put("type_id", id);
-                    jsonObject.put("type_name", name);
-                    classes.put(jsonObject);
+                Elements elements = doc.select("ul.navbar-items li a");
+                JSONArray classes = new JSONArray();
+                for (Element ele : elements) {
+                    String name = ele.attr("title");
+                    boolean show = name.equals("电影") ||
+                            name.equals("连续剧") ||
+                            name.equals("综艺") ||
+                            name.equals("动漫");
+                    if (show) {
+                        Matcher mather = regexCategory.matcher(ele.attr("href"));
+                        if (!mather.find())
+                            continue;
+                        // 把分类的id和名称取出来加到列表里
+                        String id = mather.group(1).trim();
+                        JSONObject jsonObject = new JSONObject();
+                        jsonObject.put("type_id", id);
+                        jsonObject.put("type_name", name);
+                        classes.put(jsonObject);
+                    }
                 }
-            }
-            JSONObject result = new JSONObject();
-            if (filter) {
-                result.put("filters", filterConfig);
-            }
-            result.put("class", classes);
-            try {
-                // 取首页推荐视频列表
-                Element homeList = doc.select("div.module-items").get(0);
-                Elements list = homeList.select("div.module-item");
-                JSONArray videos = new JSONArray();
-                for (int i = 0; i < list.size(); i++) {
-                    Element vod = list.get(i);
-                    String title = vod.select("div.module-item-titlebox a").attr("title");
-                    String cover = vod.select("img.lazy lazyloaded").attr("data-src");
-                    String remark = vod.select("div.module-item-text").text();
-                    Matcher matcher = regexVid.matcher(vod.select("div.module-item-titlebox a").attr("href"));
-                    if (!matcher.find())
-                        continue;
-                    String id = matcher.group(1);
-                    JSONObject v = new JSONObject();
-                    v.put("vod_id", id);
-                    v.put("vod_name", title);
-                    v.put("vod_pic", cover);
-                    v.put("vod_remarks", remark);
-                    videos.put(v);
+
+
+                if (filter) {
+                    result.put("filters", filterConfig);
                 }
-                result.put("list", videos);
-            } catch (Exception e) {
-                SpiderDebug.log(e);
-            }
+                result.put("class", classes);
+                try {
+                    // 取首页推荐视频列表
+                    Element homeList = doc.select("div.module").get(0);
+                    Elements list = homeList.select("div.module-main div.module-items a");
+                    JSONArray videos = new JSONArray();
+                    for (int j = 0; j < list.size(); j++) {
+                        Element vod = list.get(j);
+                        String title = vod.attr("title");
+                        String cover = FixUrl(pic, vod.select("div.module-item-pic img").attr("data-original"));
+                        String remark = vod.select("div.module-item-note").text();
+                        Matcher matcher = regexVid.matcher(vod.attr("href"));
+                        if (!matcher.find())
+                            continue;
+                        String id = matcher.group(1);
+                        JSONObject v = new JSONObject();
+                        v.put("vod_id", id);
+                        v.put("vod_name", title);
+                        v.put("vod_pic", cover);
+                        v.put("vod_remarks", remark);
+                        videos.put(v);
+                    }
+                    result.put("list", videos);
+                } catch (Exception e) {
+                    SpiderDebug.log(e);
+                }
+          //  }
             return result.toString();
         } catch (Exception e) {
             SpiderDebug.log(e);
         }
+
         return "";
     }
 
@@ -229,15 +228,13 @@ public class Nfyun extends Spider {
             JSONArray videos = new JSONArray();
             if (!html.contains("没有找到您想要的结果哦")) {
                 // 取当前分类页的视频列表
-                Element homeList = doc.select("div.module-items").get(0);
-                Elements list = homeList.select("div.module-item");
-                JSONArray videos = new JSONArray();
+                Elements list = doc.select("div.module-main div.module-items a");
                 for (int i = 0; i < list.size(); i++) {
                     Element vod = list.get(i);
-                    String title = vod.select("div.module-item-titlebox a").attr("title");
-                    String cover = vod.select("img.lazy lazyloaded").attr("data-src");
-                    String remark = vod.select("div.module-item-text").text();
-                    Matcher matcher = regexVid.matcher(vod.select("div.module-item-titlebox a").attr("href"));
+                    String title = vod.attr("title");
+                    String cover = FixUrl(pic, vod.select("div.module-item-pic img").attr("data-original"));
+                    String remark = vod.select("div.module-item-note").text();
+                    Matcher matcher = regexVid.matcher(vod.attr("href"));
                     if (!matcher.find())
                         continue;
                     String id = matcher.group(1);
@@ -272,43 +269,41 @@ public class Nfyun extends Spider {
     public String detailContent(List<String> ids) {
         try {
             // 视频详情url
-            String url = siteUrl + "/vodeo/" + ids.get(0) + ".html";
+            String url = siteUrl + "/video/" + ids.get(0) + ".html";
             Document doc = Jsoup.parse(OkHttpUtil.string(url, getHeaders(url)));
             JSONObject result = new JSONObject();
             JSONObject vodList = new JSONObject();
-
-            String cover = FixUrl(pic, doc.selectFirst("div.module-item-pic img").attr("data-src"));
-            String title = doc.selectFirst("div.video-info-header h1").text();
-
-            String category = "", area = "", year = "", director = "", actor = "", remark = "", desc = "";
-
-            category = doc.select("div.module-info-tag-link").get(2).text();
-            year = doc.select("div.module-info-tag-link a").get(0).text();
-            area = doc.select("div.module-info-tag-link a").get(1).text();
-            desc = doc.select("div.video-info-content span").text();
-
-            Elements span_text_muted = doc.select("div.module-info-item span");
-            for (int i = 0; i < span_text_muted.size() - 2; i++) {
-                Element Spantext = span_text_muted.get(i);
-                String info = Spantext.text();
-                if (info.contains("更新：")) {
-                    try {
-                        remark = Spantext.parent().select("div").text();
-                    } catch (Exception e) {
-                        remark = "";
+            // 取基本数据
+            String cover = doc.selectFirst("div.module-item-pic > img").attr("data-src");
+            String title = doc.selectFirst("div.video-info-header > h1.page-title").text();
+            String desc = doc.select("div.video-info-content span").text();
+            String category = "", area = "", year = "", remark = "", director = "", actor = "";
+            Elements span_text_muted = doc.select("div.video-info-main span.video-info-itemtitle");
+            for (int i = 0; i < span_text_muted.size(); i++) {
+                Element text = span_text_muted.get(i);
+                String info = text.text();
+                if (info.equals("分类：")) {
+                    category = text.nextElementSibling().text();
+                } else if (info.equals("上映：")) {
+                    year = text.nextElementSibling().text();
+                } else if (info.equals("地区：")) {
+                    area = text.nextElementSibling().text();
+                } else if (info.equals("更新：")) {
+                    remark = text.nextElementSibling().text();
+                } else if (info.equals("导演：")) {
+                    List<String> directors = new ArrayList<>();
+                    Elements aa = text.parent().select("a");
+                    for (int j = 0; j < aa.size(); j++) {
+                        directors.add(aa.get(j).text());
                     }
-                } else if (info.contains("导演：")) {
-                    try {
-                        director = Spantext.parent().select("div a").text();
-                    } catch (Exception e) {
-                        director = "";
+                    director = TextUtils.join(",", directors);
+                } else if (info.equals("主演：")) {
+                    List<String> actors = new ArrayList<>();
+                    Elements aa = text.parent().select("a");
+                    for (int j = 0; j < aa.size(); j++) {
+                        actors.add(aa.get(j).text());
                     }
-                } else if (info.contains("主演：")) {
-                    try {
-                        actor = Spantext.parent().select("div a").text();
-                    } catch (Exception e) {
-                        actor = "";
-                    }
+                    actor = TextUtils.join(",", actors);
                 }
             }
 
@@ -322,7 +317,6 @@ public class Nfyun extends Spider {
             vodList.put("vod_actor", actor);
             vodList.put("vod_director", director);
             vodList.put("vod_content", desc);
-
             Map<String, String> vod_play = new TreeMap<>(new Comparator<String>() {
                 @Override
                 public int compare(String o1, String o2) {
@@ -340,7 +334,6 @@ public class Nfyun extends Spider {
                     return 1;
                 }
             });
-
             // 取播放列表数据
             Elements sources = doc.select("div.module-tab-items-box div span");
             Elements sourceList = doc.select("div.module-play-list");
