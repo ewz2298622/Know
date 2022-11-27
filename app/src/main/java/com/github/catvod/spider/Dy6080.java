@@ -481,7 +481,8 @@ public class Dy6080 extends Spider {
                                     });
                                 }
                             }
-                            result.put("parse", 0);
+                            result.put("parse", 1);
+                            result.put("jx", "1");
                             result.put("playUrl", "");
                         }
                         else {
