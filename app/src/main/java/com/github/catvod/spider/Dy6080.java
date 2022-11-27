@@ -425,6 +425,7 @@ public class Dy6080 extends Spider {
                     if (playerConfig.has(player.getString("from"))) {
                         JSONObject pCfg = playerConfig.getJSONObject(player.getString("from"));
                         String videoUrl = player.getString("url");
+                        String playUrl = pCfg.getString("pu");
                         String show = pCfg.getString("show");
                         System.out.println("yx" + show);
                         if (show.contains("蓝光专线①")) {
@@ -433,7 +434,7 @@ public class Dy6080 extends Spider {
                             HashMap<String, String> headers = new HashMap<>();
                             headers.put("referer", url);
                             Document doc1 = Jsoup.parse(OkHttpUtil.string(jxurl,Headers()));
-
+                            Pattern pattern = Pattern.compile("(?<=url\"\\S\").*?(?=\")");
                             Elements script = doc1.select("body>script");
                             for (int j = 0; j < script.size(); j++) {
                                 String content = script.get(j).html().trim();
