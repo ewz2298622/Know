@@ -422,12 +422,13 @@ public class Dy6080 extends Spider {
                     int end = scContent.lastIndexOf('}') + 1;
                     String json = scContent.substring(start, end);
                     JSONObject player = new JSONObject(json);
+                    System.out.println("pla" + player);
                     if (playerConfig.has(player.getString("from"))) {
                         JSONObject pCfg = playerConfig.getJSONObject(player.getString("from"));
+                        System.out.println("pc" + pCfg);
                         String videoUrl = player.getString("url");
                         String playUrl = pCfg.getString("pu");
                         String show = pCfg.getString("show");
-                        System.out.println("yx" + show);
                         if (show.contains("蓝光专线①")) {
                             String jxurl = "https://jx1.bw66.xyz/m3u8/?url=" + videoUrl;
                             System.out.println("BYGA" + jxurl);
@@ -471,17 +472,16 @@ public class Dy6080 extends Spider {
 
                                         public void onResponse(String str) {
                                             try {
-                                                String url =  new JSONObject(str).getString("url");
-                                                System.out.println("bf" + url);
-                                                result.put("url", url);
-
-                                            } catch (JSONException e) {
-                                                e.printStackTrace();
-                                            }
-                                        }
-                                    });
+                                        String url = new String(Base64.decode(new JSONObject(str).getString("url").substring(8).getBytes(), Base64.DEFAULT));
+                                        result.put("url", url.substring(8, url.length() - 8));
+                                    } catch (JSONException e) {
+                                        e.printStackTrace();
+                                    }
                                 }
-                            }
+                            });
+                          }
+                          }
+                        //    result.put("header", headers.toString());
                             result.put("parse", 0);
                             result.put("playUrl", "");
                         }
