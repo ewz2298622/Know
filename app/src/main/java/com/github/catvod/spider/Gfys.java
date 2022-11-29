@@ -27,8 +27,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Gfys extends Spider {
-    private static final String siteUrl = "https://www.gfysys1.com";
-    private static final String siteHost = "www.gfysys1.com";
+    private static final String siteUrl = "https://www.libvio.me/";
+    private static final String siteHost = "www.libvio.me";
 
     /**
      * 播放源配置
@@ -40,7 +40,7 @@ public class Gfys extends Spider {
     private JSONObject filterConfig;
     private Pattern regexCategory = Pattern.compile("/vodtype/(\\d+).html");
     private Pattern regexVid = Pattern.compile("/voddetail/(\\d+).html");
-    private Pattern regexPlay = Pattern.compile("/play/(\\d+)-(\\d+)-(\\d+).html");
+    private Pattern regexPlay = Pattern.compile("/vodplay/(\\d+)-(\\d+)-(\\d+).html");
     private Pattern regexPage = Pattern.compile("/vodshow/(\\S+).html");
 
     protected String ext = null;
@@ -98,7 +98,8 @@ public class Gfys extends Spider {
                 String name = ele.text();
                 boolean show = name.equals("电影") ||
                         name.equals("剧集") ||
-                        name.equals("动漫") |
+                        name.equals("动漫") ||
+                        name.equals("日韩剧") ||
                         name.equals("综艺");
                 if (show) {
                     Matcher mather = regexCategory.matcher(ele.attr("href"));
@@ -172,7 +173,7 @@ public class Gfys extends Spider {
                 }
             }
             // 获取分类数据的url
-            String url = siteUrl + "/vodshow/" + TextUtils.join("-", urlParams) + ".html";
+            String url = siteUrl + "show/" + TextUtils.join("-", urlParams) + ".html";
             String html = OkHttpUtil.string(url, getHeaders(url));
             Document doc = Jsoup.parse(html);
             JSONObject result = new JSONObject();
@@ -327,7 +328,7 @@ public class Gfys extends Spider {
             });
 
             // 取播放列表数据
-            Elements sources = doc.select("div.stui-vodlist__head h3");
+            Elements sources = doc.select("div.stui-pannel__head ul.nav li a");
             Elements sourceList = doc.select("ul.stui-content__playlist");
 
             for (int i = 0; i < sources.size(); i++) {
@@ -395,12 +396,12 @@ public class Gfys extends Spider {
         try {
             //定义播放用的headers
             JSONObject headers = new JSONObject();
-            headers.put("origin", " https://www.gfysys1.com");
+            headers.put("origin", " https://www.gfysys1.com/");
             headers.put("User-Agent", " Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36");
             headers.put("Accept", " */*");
             headers.put("Accept-Language", " zh-CN,zh;q=0.9,en-US;q=0.3,en;q=0.7");
             headers.put("Accept-Encoding", " gzip, deflate");
-            headers.put("referer", " https://www.gfysys1.com");
+            headers.put("referer", " https://www.gfysys1.com/");
             // 播放页 url
             String url = siteUrl + "/vodplay/" + id + ".html";
             Document doc = Jsoup.parse(OkHttpUtil.string(url, getHeaders(url)));
