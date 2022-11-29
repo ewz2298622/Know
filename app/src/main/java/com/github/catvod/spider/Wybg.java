@@ -275,44 +275,15 @@ public class Wybg extends Spider {
             JSONObject vodList = new JSONObject();
 
             // 取基本数据
-            String cover = doc.select(" div.module-item-pic  img").attr("data-original");
-            String title = doc.select(" div.module-info-heading  h1").text();
-            String category = "", area = "", year = "", remark = "", director = "", actor = "", desc = "";
-    
-            Elements span_text_muted = doc.select("div.module-info-items div.module-info-item  span");
-           year = doc.selectFirst("div.module-info-tag > div > a").text();
-            desc = doc.selectFirst("div.module-info-introduction-content p").text().trim();
-            for (int i = 0; i < span_text_muted.size(); i++) {
-                Element text = span_text_muted.get(i);
-                String info = text.text();
-                if (info.equals("更新：")) {
-                    remark = text.nextElementSibling().text();
-                    System.out.println("rma" + remark);
-                } else if (info.equals("导演：")) {
-                    List<String> directors = new ArrayList<>();
-                    Elements aa = text.parent().select("div.module-info-item-content a");
-                    for (int j = 0; j < aa.size(); j++) {
-                        directors.add(aa.get(j).text());
-                    }
-                    director = TextUtils.join(",", directors);
-                } else if (info.equals("主演：")) {
-                    List<String> actors = new ArrayList<>();
-                    Elements aa = text.parent().select("div.module-info-item-content a");
-                    for (int j = 0; j < aa.size(); j++) {
-                        actors.add(aa.get(j).text());
-                    }
-                    actor = TextUtils.join(",", actors);
-                }
-            }
+            String cover = doc.selectFirst("div.stui-content__thumb a img").attr("data-original");
+
+            String title = doc.selectFirst("div.stui-content__detail h1").text();
+
+            String desc = doc.selectFirst("span.detail-content").text();
+            System.out.println("co" + desc);
             vodList.put("vod_id", ids.get(0));
             vodList.put("vod_name", title);
             vodList.put("vod_pic", cover);
-         //   vodList.put("type_name", category);
-            vodList.put("vod_year", year);
-         //   vodList.put("vod_area", area);
-            vodList.put("vod_remarks", remark);
-            vodList.put("vod_actor", actor);
-            vodList.put("vod_director", director);
             vodList.put("vod_content", desc);
 
             Map<String, String> vod_play = new LinkedHashMap<>();
