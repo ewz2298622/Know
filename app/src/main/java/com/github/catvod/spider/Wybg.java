@@ -392,107 +392,76 @@ public class Wybg extends Spider {
      * @param vipFlags 所有可能需要vip解析的源
      * @return
      */
-     private final Pattern urlt = Pattern.compile("\"url\": *\"([^\"]*)\",");
-    private final Pattern token = Pattern.compile("\"token\": *\"([^\"]*)\"");
-    private final Pattern vkey = Pattern.compile("\"vkey\": *\"([^\"]*)\",");
-//    private final Pattern tm = Pattern.compile("\"tm\": *\"([^\"]*)\",");
     @Override
     public String playerContent(String flag, String id, List<String> vipFlags) {
         try {
             //定义播放用的headers
-
-            String url = siteUrl + "/play/" + id + ".html";
-           // JSONObject headers = new JSONObject();
-           // headers.put("origin", " https://www.jubaibai.me/");
-           // headers.put("User-Agent", " Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36");
-          //  headers.put("Accept", " */*");
-        //     headers.put("Accept-Language", " zh-CN,zh;q=0.9,en-US;q=0.3,en;q=0.7");
-         //   headers.put("Accept-Encoding", " gzip, deflate");
-
+            JSONObject headers = new JSONObject();
+            headers.put("origin", " www.007ts.me");
+            headers.put("User-Agent", " Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36");
+            headers.put("Accept", " */*");
+            headers.put("Accept-Language", " zh-CN,zh;q=0.9,en-US;q=0.3,en;q=0.7");
+            headers.put("Accept-Encoding", " gzip, deflate");
+            headers.put("referer", " www.007ts.me");
             // 播放页 url
-            Elements allScript = Jsoup.parse(OkHttpUtil.string(url, getHeaders(url))).select("script");
-            JSONObject result = new JSONObject();
+            String url = siteUrl + "/play/" + id + ".html";
+            Document doc = Jsoup.parse(OkHttpUtil.string(url, getHeaders(url)));
+
+            Elements allScript = doc.select("script");
             for (int i = 0; i < allScript.size(); i++) {
                 String scContent = allScript.get(i).html().trim();
-                if (scContent.startsWith("var player_aaaa")) { // 取直链
+                if (scContent.startsWith("var player_")) { // 取直链
                     int start = scContent.indexOf('{');
                     int end = scContent.lastIndexOf('}') + 1;
                     String json = scContent.substring(start, end);
                     JSONObject player = new JSONObject(json);
-                    System.out.println("pla" + player);
                     if (playerConfig.has(player.getString("from"))) {
                         JSONObject pCfg = playerConfig.getJSONObject(player.getString("from"));
-                        System.out.println("pc" + pCfg);
-                        String videoUrl = player.getString("url");
-                        String playUrl = pCfg.getString("parse");
-                        String show = pCfg.getString("show");
-                        if (show.contains("VOFLIX")) {
-                       String jxurl = "https://play.shcpin.com/xplay/?url=" + videoUrl;
-                       System.out.println("jx" + jxurl);
-                       HashMap<String, String> headers = new HashMap<>();
-                            headers.put("referer", siteUrl);
-                       Document doc = Jsoup.parse(OkHttpUtil.string(jxurl,headers));
-                       System.out.println("zh" + doc);
-                        Elements script = doc.select("body>script");
-                        for (int j = 0; j < script.size(); j++) {
-                          String content = script.get(j).html().trim();
-                        if (content.contains("var config =")){
-                            Matcher matcher1 = urlt.matcher(content);
-                            if (!matcher1.find())
-                                continue;
-                            Matcher matcher2 = token.matcher(content);
-                            if (!matcher2.find())
-                                continue;
-                            Matcher matcher3 = vkey.matcher(content);
-                            if (!matcher3.find())
-                                continue;
-                            String video_url = matcher1.group(1);
-                            String video_token = matcher2.group(1);
-                            String video_key = matcher3.group(1);                          
-                            String video_sign= "F4penExTGogdt6U8" ;
-                            String video_tm = String.valueOf(System.currentTimeMillis()/ 1000);
-                            HashMap hashMap = new HashMap();
-                            hashMap.put("token", video_token);
-                            hashMap.put("tm", video_tm);
-                            hashMap.put("url", video_url);
-                            hashMap.put("vkey", video_key);
-                             hashMap.put("sign", video_sign);
-                            OkHttpUtil.get(OkHttpUtil.defaultClient(), "https://play.shcpin.com/xplay/555tZ4pvzHE3BpiO838.php", hashMap, new OKCallBack.OKCallBackString() {
-                                @Override
-                                protected void onFailure(Call call, Exception exc) {
+                        if (player.getString("from").contains("LINE")) {
+                            String videoUrl = pCfg.getString("pu") + player.getString("url");
+                            Document docs = Jsoup.parse(OkHttpUtil.string(videoUrl, Headers()));
+                            Pattern pattern = Pattern.compile("(?<=urls\\s=\\s').*?(?=')");
+                            Elements allScripts = docs.select("body script");
+                            for (int j = 0; j < allScripts.size(); j++) {
+                                String scContents = allScripts.get(j).html().trim();
+                                Matcher matcher = pattern.matcher(scContents);
+                                if (matcher.find()) {
+                                    JSONObject result = new JSONObject();
+                                    String players = matcher.group(0);
+                                    result.put("parse", 0);
+                                    result.put("playUrl", "");
+                                    result.put("url", players);
+                                    return result.toString();
                                 }
-
-                            public void onResponse(String str) {
-                            try {
-                                        String url = new String(Base64.decode(new JSONObject(str).getString("url").substring(8).getBytes(), Base64.DEFAULT));
-                                        result.put("url", url.substring(8, url.length() - 8));
-                                    } catch (JSONException e) {
-                                        e.printStackTrace();
-                                    }
-                                }
-                            });
-                          }
-                          }
-                        //    result.put("header", headers.toString());
-                            result.put("parse", 0);
+                            }
+                        }
+                        else {
+                            SpiderDebug.log(url);
+                            JSONObject result = new JSONObject();
+                            result.put("parse", 1);
                             result.put("playUrl", "");
-                        } else {
-                            if (videoUrl.contains(".m3u8")) {
-                                result.put("parse", 0);
-                                result.put("playUrl", "");
-                                result.put("url", videoUrl);
-                             //   result.put("header", headers.toString());
-                    }    
-                  }
-                 } 
-              }  
+                            result.put("url", url);
+                            //   result.put("header", "{\"Referer\", \"https://www.libvio.me/\"}");
+                            return result.toString();
+                        }
+                        break;
+                    }
+                }
             }
-            return result.toString();
         } catch (Exception e) {
             SpiderDebug.log(e);
         }
         return "";
     }
+
+ //   protected static HashMap<String, String> sHeaders(String url) {
+  //      HashMap<String, String> headers = new HashMap<>();
+//        headers.put("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36");
+ //       headers.put("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9");
+ //       headers.put("Accept-encoding", "gzip, deflate, br");
+  //      headers.put("Accept-language", "zh-SG,zh;q=0.9,en-GB;q=0.8,en;q=0.7,zh-CN;q=0.6");
+ //       return headers;
+ //   }
 
     @Override
     public String searchContent(String key, boolean quick) {
