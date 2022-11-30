@@ -189,7 +189,7 @@ public class Wybg extends Spider {
             int pageCount = 0;
             int page = -1;
 
-            Elements pageInfo = doc.select("ul.stui-page__item li");
+            Elements pageInfo = doc.select("div[id='page'] a");
             if (pageInfo.size() == 0) {
                 page = Integer.parseInt(pg);
                 pageCount = page;
@@ -200,10 +200,10 @@ public class Wybg extends Spider {
                     if (a == null)
                         continue;
                     String name = a.text();
-                    if (page == -1 && li.hasClass("active")) {
+                    if (page == -1 && li.hasClass("page-current")) {
                         Matcher matcher = regexPage.matcher(a.attr("href"));
                         if (matcher.find()) {
-                            page = Integer.parseInt(matcher.group(1));
+                            page = Integer.parseInt(matcher.group(1).split("-")[8]);
                         } else {
                             page = 0;
                         }
@@ -211,7 +211,7 @@ public class Wybg extends Spider {
                     if (name.equals("尾页")) {
                         Matcher matcher = regexPage.matcher(a.attr("href"));
                         if (matcher.find()) {
-                            pageCount = Integer.parseInt(matcher.group(1));
+                            pageCount = Integer.parseInt(matcher.group(1).split("-")[8]);
                         } else {
                             pageCount = 0;
                         }
@@ -279,17 +279,15 @@ public class Wybg extends Spider {
         try {
             // 视频详情url
             String url = siteUrl + "/voddetail/" + ids.get(0) + ".html";
-            Document doc = Jsoup.parse(OkHttpUtil.string(url, getHeaders(url)));
+            Document doc = Jsoup.parse(OkHttpUtil.string(url, getHeaders(siteUrl)));
             JSONObject result = new JSONObject();
             JSONObject vodList = new JSONObject();
 
             // 取基本数据
-            String cover = doc.selectFirst("div.stui-content__thumb a img").attr("data-original");
-
+            String cover = doc.selectFirst("div.stui-content__thumb img").attr("data-original");
             String title = doc.selectFirst("div.stui-content__detail h1").text();
-
             String desc = doc.selectFirst("span.detail-content").text();
-            System.out.println("co" + desc);
+
             vodList.put("vod_id", ids.get(0));
             vodList.put("vod_name", title);
             vodList.put("vod_pic", cover);
