@@ -37,7 +37,7 @@ import okhttp3.Call;
  * Author: baddychen
  */
 public class Wybg extends Spider {
-    private static final String siteUrl = "https://www.smdyy.cc";
+    private static final String siteUrl = "https://www.wybg666.com";
     /**
      * 播放源配置
      */
@@ -46,10 +46,10 @@ public class Wybg extends Spider {
      * 筛选配置
      */
     private JSONObject filterConfig;
-    private Pattern regexCategory = Pattern.compile("/list/(\\d+).html");
-    private Pattern regexVid = Pattern.compile("/kan/(\\d+).html");
-    private Pattern regexPlay = Pattern.compile("/play/(\\d+)-(\\d+)-(\\d+).html");
-    private Pattern regexPage = Pattern.compile("/show/(\\S+).html");
+    private Pattern regexCategory = Pattern.compile("/vodtype/(\\d+).html");
+    private Pattern regexVid = Pattern.compile("/voddetail/(\\d+).html");
+    private Pattern regexPlay = Pattern.compile("/vodplay/(\\d+)-(\\d+)-(\\d+).html");
+    private Pattern regexPage = Pattern.compile("/vodshow/(\\S+).html");
 
     protected String ext = null;
 
