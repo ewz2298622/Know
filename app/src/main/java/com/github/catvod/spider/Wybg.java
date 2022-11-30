@@ -400,12 +400,12 @@ public class Wybg extends Spider {
     public String playerContent(String flag, String id, List<String> vipFlags) {
         try {
             JSONObject headers = new JSONObject();
-            headers.put("Referer", " https://www.smdyy.cc/");
+            headers.put("Referer", " https://www.wybg666.com/");
             headers.put("User-Agent", " Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.198 Safari/537.36");
             headers.put("Accept", " text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9");
             headers.put("Accept-Language", " zh-CN,zh;q=0.9,en-GB;q=0.8,en-US;q=0.7,en;q=0.6");
             headers.put("Accept-Encoding", " gzip, deflate");
-            String url = siteUrl + "/play/" + id + ".html";
+            String url = siteUrl + "/vodplay/" + id + ".html";
             Elements allScript = Jsoup.parse(OkHttpUtil.string(url, getHeaders(url))).select("script");
             JSONObject result = new JSONObject();
             for (int i = 0; i < allScript.size(); i++) {
@@ -439,8 +439,8 @@ public class Wybg extends Spider {
                             hashMap.put("token", token);
                             hashMap.put("url", urlt);
                             hashMap.put("vkey", vkey);
-                            hashMap.put("sign", "smdyycc");
-                            OkHttpUtil.post(OkHttpUtil.defaultClient(), "https://player.6080kan.cc/player/xinapi.php", hashMap, new OKCallBack.OKCallBackString() {
+                            hashMap.put("sign", "bKvCXSsVjPyTNr9R");
+                            OkHttpUtil.post(OkHttpUtil.defaultClient(), "https://player.wybg666.com/xinapi.php", hashMap, new OKCallBack.OKCallBackString() {
                                 @Override
                                 protected void onFailure(Call call, Exception exc) {
                                 }
