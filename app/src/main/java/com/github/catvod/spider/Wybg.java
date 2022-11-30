@@ -189,7 +189,7 @@ public class Wybg extends Spider {
             int pageCount = 0;
             int page = -1;
 
-            Elements pageInfo = doc.select("div[id='page'] a");
+            Elements pageInfo = doc.select("ul.stui-page__item li");
             if (pageInfo.size() == 0) {
                 page = Integer.parseInt(pg);
                 pageCount = page;
@@ -200,10 +200,10 @@ public class Wybg extends Spider {
                     if (a == null)
                         continue;
                     String name = a.text();
-                    if (page == -1 && li.hasClass("page-current")) {
+                    if (page == -1 && li.hasClass("active")) {
                         Matcher matcher = regexPage.matcher(a.attr("href"));
                         if (matcher.find()) {
-                            page = Integer.parseInt(matcher.group(1).split("-")[8]);
+                            page = Integer.parseInt(matcher.group(1));
                         } else {
                             page = 0;
                         }
@@ -211,7 +211,7 @@ public class Wybg extends Spider {
                     if (name.equals("尾页")) {
                         Matcher matcher = regexPage.matcher(a.attr("href"));
                         if (matcher.find()) {
-                            pageCount = Integer.parseInt(matcher.group(1).split("-")[8]);
+                            pageCount = Integer.parseInt(matcher.group(1));
                         } else {
                             pageCount = 0;
                         }
@@ -279,55 +279,23 @@ public class Wybg extends Spider {
         try {
             // 视频详情url
             String url = siteUrl + "/voddetail/" + ids.get(0) + ".html";
-            Document doc = Jsoup.parse(new URL(url).openStream(), "utf-8",OkHttpUtil.string(url, getHeaders(url)));
+            Document doc = Jsoup.parse(OkHttpUtil.string(url, getHeaders(url)));
             JSONObject result = new JSONObject();
             JSONObject vodList = new JSONObject();
 
             // 取基本数据
-            String cover = doc.selectFirst("div.module-item-pic img").attr("data-original");
-            if (!TextUtils.isEmpty(cover) && !cover.startsWith("http")) {
-                cover = siteUrl + cover;
-            }
-            String title = doc.selectFirst("div.module-info-heading h1").text();
-            String category = "", area = "", year = "", remark = "", director = "", actor = "", desc = "";
-            Elements data = doc.select("div.module-info-items > div");
-            desc = doc.selectFirst("div.module-info-introduction-content p").text().trim();
-            category =doc.select("div.module-info-tag div").get(2).text().trim();
-            year=doc.select("div.module-info-tag div").get(0).text().trim();
-            area =doc.select("div.module-info-tag div").get(1).text().trim();
-            //year = Regex(Pattern.compile("上映：(\\S+)"), data.get(0).text());
-            actor = Regex(Pattern.compile("主演：(\\S+)"), data.nextAll().text());
-            director = Regex(Pattern.compile("导演：(\\S+)"), data.nextAll().text());
-            // remark=data.select("div.module-info-item-content").text().trim();
+            String cover = doc.selectFirst("div.stui-content__thumb a img").attr("data-original");
 
+            String title = doc.selectFirst("div.stui-content__detail h1").text();
+
+            String desc = doc.selectFirst("span.detail-content").text();
+            System.out.println("co" + desc);
             vodList.put("vod_id", ids.get(0));
             vodList.put("vod_name", title);
             vodList.put("vod_pic", cover);
-            vodList.put("type_name", category);
-            vodList.put("vod_year", year);
-            vodList.put("vod_area", area);
-            vodList.put("vod_remarks", remark);
-            vodList.put("vod_actor", actor);
-            vodList.put("vod_director", director);
             vodList.put("vod_content", desc);
 
-            Map<String, String> vod_play = new TreeMap<>(new Comparator<String>() {
-                @Override
-                public int compare(String o1, String o2) {
-                    try {
-                        int sort1 = playerConfig.getJSONObject(o1).getInt("or");
-                        int sort2 = playerConfig.getJSONObject(o2).getInt("or");
-
-                        if (sort1 == sort2) {
-                            return 1;
-                        }
-                        return sort1 - sort2 > 0 ? 1 : -1;
-                    } catch (JSONException e) {
-                        SpiderDebug.log(e);
-                    }
-                    return 1;
-                }
-            });
+            Map<String, String> vod_play = new LinkedHashMap<>();
 
             // 取播放列表数据
             Elements sources = doc.select("div.stui-pannel__head ul.nav li a");
@@ -339,7 +307,7 @@ public class Wybg extends Spider {
                 boolean found = false;
                 for (Iterator<String> it = playerConfig.keys(); it.hasNext(); ) {
                     String flag = it.next();
-                    if (playerConfig.getJSONObject(flag).getString("sh").equals(sourceName)) {
+                    if (playerConfig.getJSONObject(flag).getString("show").equals(sourceName)) {
                         sourceName = flag;
                         found = true;
                         break;
