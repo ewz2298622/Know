@@ -33,12 +33,12 @@ import okhttp3.Call;
 
 
 /**
- * 蓝光影院
+ * 
  * <p>
- * Author: 匿名20220729
+ * 
  */
 public class Wybg extends Spider {
-    private static final String siteUrl = "https://lgyy.tv";
+    private static final String siteUrl = "https://www.wybg666.com";
 
     /**
      * 播放源配置
@@ -97,7 +97,7 @@ public class Wybg extends Spider {
         try {
             Document doc = Jsoup.parse(new URL(siteUrl).openStream(), "utf-8",OkHttpUtil.string(siteUrl, getHeaders(siteUrl)));
             // 分类节点
-            Elements elements = doc.select("ul[class='navbar-items swiper-wrapper'] >li a");
+            Elements elements = doc.select("ul[class='stui_header__user'] >li a");
             JSONArray classes = new JSONArray();
             for (Element ele : elements) {
                 String name = ele.text();
@@ -126,19 +126,17 @@ public class Wybg extends Spider {
             }
             result.put("class", classes);
             try {
-                Elements list = doc.select("div[class='module-items module-poster-items-base'] >a");
+                Element homeList = doc.select("ul.stui-vodlist").get(0);
+                Elements list = homeList.select("div.stui-vodlist__box");
                 JSONArray videos = new JSONArray();
                 for (int i = 0; i < list.size(); i++) {
                     Element vod = list.get(i);
-                    Matcher matcher = regexVid.matcher(vod.selectFirst(".module-poster-item").attr("href"));
+                    String title = vod.select("a").attr("title");
+                    String cover = vod.select("a").attr("data-original");
+                    String remark = vod.select("a .pic-text").text();
+                    Matcher matcher = regexVid.matcher(vod.select("a").attr("href"));
                     if (!matcher.find())
                         continue;
-                    String title = vod.selectFirst(".module-poster-item").attr("title");
-                    String cover = vod.selectFirst("div.module-item-cover div.module-item-pic img").attr("data-original");
-                    String remark = vod.selectFirst("div.module-item-cover div.module-item-note").text();
-                    if (!TextUtils.isEmpty(cover) && !cover.startsWith("http")) {
-                        cover = siteUrl + cover;
-                    }
                     String id = matcher.group(1);
                     JSONObject v = new JSONObject();
                     v.put("vod_id", id);
@@ -183,7 +181,7 @@ public class Wybg extends Spider {
                 }
             }
             // 获取分类数据的url
-            String url = siteUrl + "/vodshow/" + TextUtils.join("-", urlParams) + "/";
+            String url = siteUrl + "/vodshow/" + TextUtils.join("-", urlParams) + ".html";
             String html = OkHttpUtil.string(url, getHeaders(url));
             Document doc = Jsoup.parse(new URL(url).openStream(), "utf-8",OkHttpUtil.string(url, getHeaders(url)));
 
@@ -224,16 +222,13 @@ public class Wybg extends Spider {
 
             JSONArray videos = new JSONArray();
             if (!html.contains("没有找到您想要的结果哦")) {
-                Elements list = doc.select("div[class='module-items module-poster-items-base'] >a");
+                Elements list = doc.select("div.stui-vodlist__box");
                 for (int i = 0; i < list.size(); i++) {
                     Element vod = list.get(i);
-                    String title = vod.selectFirst(".module-poster-item").attr("title");
-                    String cover = vod.selectFirst("div.module-item-cover div.module-item-pic img").attr("data-original");
-                    if (!TextUtils.isEmpty(cover) && !cover.startsWith("http")) {
-                        cover = siteUrl + cover;
-                    }
-                    String remark = vod.selectFirst("div.module-item-cover div.module-item-note").text();
-                    Matcher matcher = regexVid.matcher(vod.selectFirst(".module-poster-item").attr("href"));
+                    String title = vod.select("a").attr("title");
+                    String cover = vod.select("a").attr("data-original");
+                    String remark = vod.select("a .pic-text").text();
+                    Matcher matcher = regexVid.matcher(vod.select("a").attr("href"));
                     if (!matcher.find())
                         continue;
                     String id = matcher.group(1);
@@ -335,18 +330,17 @@ public class Wybg extends Spider {
             });
 
             // 取播放列表数据
-            Elements sources = doc.select("div[id=y-playList] > div");
-            //Elements sourceList = doc.select("div.stui-vodlist__head > ul.stui-content__playlist");
+            Elements sources = doc.select("div.stui-pannel__head ul.nav li a");
+            Elements sourceList = doc.select("div.tab-content div.clearfix");
 
             for (int i = 0; i < sources.size(); i++) {
                 Element source = sources.get(i);
-                String sourceName = source.attr("data-dropdown-value");
+                String sourceName = source.text();
                 boolean found = false;
                 for (Iterator<String> it = playerConfig.keys(); it.hasNext(); ) {
                     String flag = it.next();
-                    if (playerConfig.getJSONObject(flag).getString("show").equals(sourceName)) {
-                        //sourceName = flag;
-                        sourceName = playerConfig.getJSONObject(flag).getString("show");
+                    if (playerConfig.getJSONObject(flag).getString("sh").equals(sourceName)) {
+                        sourceName = flag;
                         found = true;
                         break;
                     }
@@ -354,7 +348,7 @@ public class Wybg extends Spider {
                 if (!found)
                     continue;
                 String playList = "";
-                Elements playListA = doc.select("div.module-play-list div a");
+                Elements playListA = sourceList.get(i).select("li a");
                 List<String> vodItems = new ArrayList<>();
 
                 for (int j = 0; j < playListA.size(); j++) {
@@ -407,7 +401,7 @@ public class Wybg extends Spider {
     public String playerContent(String flag, String id, List<String> vipFlags) {
         try {
             JSONObject headers = new JSONObject();
-            headers.put("Referer", "https://lgyy.tv");
+            headers.put("Referer", "https://www.wybg666.com");
             headers.put("User-Agent", " Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.198 Safari/537.36");
             headers.put("Accept", " text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9");
             headers.put("Accept-Language", " zh-CN,zh;q=0.9,en-GB;q=0.8,en-US;q=0.7,en;q=0.6");
