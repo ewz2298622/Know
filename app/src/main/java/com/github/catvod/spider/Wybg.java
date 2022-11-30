@@ -305,7 +305,7 @@ public class Wybg extends Spider {
                 boolean found = false;
                 for (Iterator<String> it = playerConfig.keys(); it.hasNext(); ) {
                     String flag = it.next();
-                    if (playerConfig.getJSONObject(flag).getString("show").equals(sourceName)) {
+                    if (playerConfig.getJSONObject(flag).getString("sh").equals(sourceName)) {
                         sourceName = flag;
                         found = true;
                         break;
